@@ -1,8 +1,17 @@
+<<<<<<< HEAD
 ﻿# Définition des personnages
+=======
+﻿#salut salut salut 
+# Définition des personnages
+>>>>>>> e6f3d4d (Initial commit)
 define e = Character("Accueil Perso", color="#42aaff")
 define p = Character("Professeur", color="#ff8c00")
 define d = Character("Directeur", color="#008000")
 define el = Character("Élève", color="#ff1493")
+<<<<<<< HEAD
+=======
+define h = Character("Hector le dinosaure", color="#f80036")
+>>>>>>> e6f3d4d (Initial commit)
 
 # Images des lieux
 image map_overlay = "images/decor_8_hover.png"  # Image avec surbrillance des zones
@@ -116,6 +125,10 @@ label start:
     show screen debug_mouse_position
     scene black
     with fade
+<<<<<<< HEAD
+=======
+    h "Salut je suis hector le dinosaure"
+>>>>>>> e6f3d4d (Initial commit)
     e "Bienvenue, enquêteur en herbe ! Il faut innocenter l'élève et trouver le véritable coupable."
     e "Nous avons plusieurs lieux à explorer. Choisis où commencer."
     e "Appuie sur la touche E à tout moment pour accéder à ton inventaire."
@@ -223,6 +236,10 @@ label prof_sport:
     
     "Les témoignages des autres élèves confirment que l'élève accusé était bien présent pendant toute la durée du cours de sport."
     
+<<<<<<< HEAD
     jump map_screen
 
     #ti kokiyol#
+=======
+    jump map_screen
+>>>>>>> e6f3d4d (Initial commit)

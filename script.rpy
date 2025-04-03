@@ -3,7 +3,7 @@ define e = Character("Accueil Perso", color="#42aaff")
 define p = Character("Professeur", color="#ff8c00")
 define d = Character("Directeur", color="#008000")
 define el = Character("Élève", color="#ff1493")
-define h = Character("Hector le dinosaure", color="#ff1232")
+define l = Character("Lola", color="#4b01c2")
 
 # Images des lieux
 image map_overlay = "images/decor_8_hover.png"  # Image avec surbrillance des zones
@@ -11,9 +11,24 @@ image salle_profs = "images/decor_3.png"
 image cdi_bg = "images/decor_4.png"
 image salle_info = "images/decor_6.png"
 image terrain_sport = "images/decor_7.png"
+image club_journalisme = "images/club_journalisme.jpg"
+
+#Initialisation des variables de score par quête
+#default quete1_score = 0
+#default quete2_score = 0
+default quete3_score = 0
+#Initialise la variable des quêtes complétées
+default quetes_complete = 0
+# Initialisation des variables d'opportunités de score par quête
+#default quete1_opportunity = ?
+#default quete2_opportunity = ?
+default quete3_opportunity = 4 #4 possibilités de bien répondre et donc 4 points de score possibles pour cette quête
+    
+#Variable pour les témoignages récupérés par le joueur dans la quête 3
+default témoignages_récupérés = []  # Initialise une liste vide pour stocker les témoignages récupérés par le joueur
 
 # Initialisation des variables
-init:
+init :
     default mousepos = "(0, 0)"
     # Système d'inventaire
     default inventory = []
@@ -27,6 +42,8 @@ init:
         "emploi_temps": {"name": "Emploi du temps", "image": "images/item_emploi.png", "description": "L'emploi du temps de l'élève accusé. Il était en sport lors de l'envoi."},
         "journal_cdi": {"name": "Registre du CDI", "image": "images/item_registre.png", "description": "Liste des élèves présents au CDI ce jour-là."},
         "capture_ecran": {"name": "Capture d'écran", "image": "images/item_capture.png", "description": "Preuve de connexion à l'ENT à une heure suspecte."}
+
+   
     }
 
 init python:
@@ -43,6 +60,12 @@ init python:
         else:
             renpy.notify("Inventaire plein")
             return False
+    
+    def calculer_pourcentage(): #pour calculer le total du score = % de fiabilité de l'article final
+        total_score = quete1_score + quete2_score + quete3_score
+        total_opportunity = quete1_opportunity + quete2_opportunity + quete3_opportunity
+        pourcentage = (float(total_score) / total_opportunity) * 100
+        return pourcentage
 
 # Faites pas gaffe, c'est juste pour caler les zones de la map cliquable avec l'image
 screen debug_mouse_position():
@@ -117,10 +140,17 @@ label start:
     show screen debug_mouse_position
     scene black
     with fade
-    h "hey connard"
     e "Bienvenue, enquêteur en herbe ! Il faut innocenter l'élève et trouver le véritable coupable."
     e "Nous avons plusieurs lieux à explorer. Choisis où commencer."
     e "Appuie sur la touche E à tout moment pour accéder à ton inventaire."
+
+    menu:
+        "Quete 1":
+            jump quete_1
+        "Quete 2":
+            jump quete_2
+        "Quete 3":
+            jump quete_3
     
     # Initialisation des touches pour l'inventaire
     $ config.keymap['inventory'] = ['e', 'E']
@@ -159,72 +189,238 @@ screen map_interactive():
         textbutton "Retour" action Return() xpos 20 ypos 1000
 
 
-label professeur:
-    scene salle_profs
-    with fade
-    p "Ce n'est pas moi qui ai envoyé ce mail ! Mon mot de passe était trop simple..."
-    p "Regardez, ces captures de mon ENT sont bizarres..."
-    
-    menu:
-        "Que faire ?"
-        
-        "Examiner l'ordinateur":
-            p "Vous pouvez voir ici les traces de connexion suspectes."
-            "Vous remarquez une capture d'écran montrant une connexion à l'heure de l'incident."
-            $ add_to_inventory("capture_ecran")
-        
-        "Demander plus d'informations":
-            p "J'ai noté quelques observations dans mon carnet. Prenez-le, ça pourrait vous aider."
-            $ add_to_inventory("carnet")
-    
-    jump map_screen
+# Quête 3 - point d'entrée
+label quete_3:
+    scene club_journalisme
+    #show lola (manque image)
 
-label cdi:
-    scene cdi_bg
-    with fade
-    d "Nous avons noté qui était présent dans le CDI ce jour-là."
-    
-    menu:
-        "Que faire ?"
-        
-        "Consulter le registre":
-            d "Voici le registre des présences. Certains élèves ont utilisé les ordinateurs du CDI."
-            $ add_to_inventory("journal_cdi")
-        
-        "Observer les ordinateurs":
-            "Vous remarquez qu'un des ordinateurs du CDI a encore l'historique de navigation ouvert."
-            "Une clé USB a été oubliée dans l'un des ports."
-            $ add_to_inventory("cle_usb")
-    
-    jump map_screen
+    l "Salut ! Du coup, pour écrire notre article j’ai mis un message sur le Forum de l’ENT du collège pour voir si des élèves et des profs avaient envie de témoigner et de nous donner des informations."
+    l "Je ne m’attendais pas à ça, mais le forum déborde. J’ai fais un premier tri mais là {b}j’ai vraiment besoin de toi pour trier les derniers messages.{/b}"
+    l "Le problème c’est que certains ont l’air un peu bizarres. Je pense qu’il y en a quelques un qui ne sont pas fiables et que mon cerveau me joue des tours."
+    l "Tu sais en classe on nous a parlé des {b}biais cognitifs{/b} et que ça pouvait nous empêcher d’y voir claire face à des informations ou des témoignages, mais viens on va regarder tout ça sur mon ordinateur."
 
-label eleve_concerne:
-    scene salle_info
-    with fade
-    el "Je ne sais pas qui m'en voulait... Peut-être mes adversaires de la dernière compétition ?"
-    el "Mais comment prouver que ce n'est pas moi ?"
-    
-    menu:
-        "Que faire ?"
-        
-        "Demander son emploi du temps":
-            el "J'étais en cours de sport au moment où le mail a été envoyé. Voici mon emploi du temps."
-            $ add_to_inventory("emploi_temps")
-        
-        "Examiner son ordinateur":
-            "L'ordinateur n'a pas de traces de connexion à l'ENT au moment des faits."
-            "Cela renforce l'alibi de l'élève."
-    
-    jump map_screen
+#jump ordinateur_lola (manque image)
 
-label prof_sport:
-    scene terrain_sport
-    with fade
-    p "Voici le plan du circuit. Les premiers élèves de la course peuvent témoigner."
-    p "L'élève accusé a participé à la course et a terminé deuxième. Impossible qu'il ait envoyé ce mail en même temps."
-    
-    "Les témoignages des autres élèves confirment que l'élève accusé était bien présent pendant toute la durée du cours de sport."
-    
-    jump map_screen
+# Scène 2 - Explication des biais
+label ordinateur_lola:
+    #scene ordinateur
+    #show lola sérieux (manque image)
 
-    #ti kokiyol#
+    l "Pour t'aider, voici ce que j’ai noté en cours sur trois biais cognitifs courants dans la diffusion de fausses informations :"
+    l "{b}Corrélation illusoire :{/b} c'est quand on voit un lien entre deux événements qui n'existent pas réellement."
+    l "{b}Autorité :{/b} croire qu'une information est vraie simplement parce qu'elle provient d'une figure réputée, sans vérifier les faits."
+    l "{b}Confirmation{/b} (cherry picking) {b}:{/b} ce biais nous pousse à ne retenir que les infos qui confirment nos croyances et à ignorer celles qui pourraient les contredire."
+    l "Donc là il faut vraiment que tu check chaque témoignage du forum. Pour chaque message, tu as deux options : Le Récupérer si tu sens qu’il est fiable ou l’Analyser si tu sens qu’il l’est pas. Et si en plus tu trouve quel biais entre en jeu, alors t’es un boss."
+    l "Après si t’analyse un témoignage qui au final est fiable c’est pas grave hein, vaut mieux être trop prudent que pas assez, tu pourra toujours le récupérer. Mais si tu dis qu’il est biaisé alors que non, c’est dommage on le mettra de côté pour rien."
+    l "Si t’as tout compris et que t’es Prêt(e), allons voir le forum !"
+
+    #jump forum
+    jump témoignage_1
+
+#label forum:
+    #scene forum (manque image)
+    #show écran_ordinateur (manque visuel forum)
+
+    #jump téémoignage_1 # est-ce qu'on met un visuel du témoignage sur un forum où on laisse l'image d'un écran d'ordi ?
+
+label témoignage_1:
+    #scene forum (manque image)
+    #show avatar_témoin_1 (manque visuel avatar) 
+    #On peut peut-être mettre une pastille comme une photo d'avatar/de profil d'un forum pour illustrer ?
+
+    # Texte du témoignage
+    "« Depuis que mon petit frère joue aux jeux de tir, il semble de plus en plus agressif. Ça doit être dû aux jeux vidéo. »"
+
+    menu:  # Crée un menu avec les options de choix pour le joueur
+        "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            l "Hmm... Ok, moi je trouve que le lien qu'il fait est bizarre..."  # Feedback mauvaise réponse
+            l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            $ quete3_score -= 1  # Score = -1
+            $ témoignages_récupérés.append("Témoignage 1 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
+            jump témoignage_2  # Saute vers le témoignage suivant
+
+        "Analyser ce témoignage":  # Option pour analyser le témoignage
+            jump analyse_biais_1  # Saute vers l'analyse du témoignage
+
+    return  
+
+# Analyse du premier témoignage
+label analyse_biais_1:
+    menu:  # Crée un menu avec des options pour le joueur
+        "Quel biais cognitif identifiez-vous ?"  # Question posée au joueur
+        "Autorité":  # Option pour choisir le biais d'autorité
+            l "Je crois que c'est plutôt un biais de corrélation illusoire. Mais déjà bravo d’avoir capté que le témoignage était biaisé."  # Feedback mauvais biais
+            l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            $ quete3_score += 1
+            jump témoignage_2
+        "Confirmation":
+            l "Je crois que c'est plutôt un biais de corrélation illusoire. Mais déjà bravo d’avoir capté que le témoignage était biaisé."  # Feedback mauvais biais
+            l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            $ quete3_score += 1
+            jump témoignage_2
+        "Corrélation illusoire":  # Option pour choisir le biais de corrélation illusoire
+            l "Trop fort ! T'as identifié le biais de corrélation illusoire. Le témoignage n'était pas fiable."  # Lola félicite le joueur
+            l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            $ quete3_score += 1  # Augmente le score du joueur de 1
+            jump témoignage_2  # Saute vers le témoignage suivant
+        "fiable":
+            l "Hmm... Ok, moi je trouve que le lien qu'il fait est bizarre..."  # Feedback mauvaise réponse
+            l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+    $ quete3_score -= 1  # Score = -1
+    $ témoignages_récupérés.append("Témoignage 1 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
+    jump témoignage_2  # Saute vers le témoignage suivant
+
+label témoignage_2:
+    #scene forum (manque image)
+    #show avatar_témoin_2 (manque visuel avatar) 
+    #On peut peut-être mettre une pastille comme une photo d'avatar/de profil d'un forum pour illustrer ?
+
+    # Texte du témoignage
+    "« Un célèbre youtubeur a affirmé que les jeux vidéo rendent violent. Il ne se trompe jamais, donc ça doit être vrai. »"
+
+    menu:  # Crée un menu avec les options de choix pour le joueur
+        "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            l "Hmm… Ok, moi je trouve qu’il fait confiance un peu vite à ce Youtubeur, en plus il dit même pas qui c’est … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
+            l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            $ quete3_score -= 1  # Score = -1
+            $ témoignages_récupérés.append("Témoignage 2 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
+            jump temoignage_3  # Saute vers le témoignage suivant
+
+        "Analyser ce témoignage":  # Option pour analyser le témoignage
+            jump analyse_biais_2  # Saute vers l'analyse du témoignage
+
+    return  
+
+# Analyse du deuxième témoignage
+label analyse_biais_2:
+    menu:  # Crée un menu avec des options pour le joueur
+        "Quel biais cognitif identifiez-vous ?"  # Question posée au joueur
+        "Autorité":  # Option pour choisir le biais d'autorité
+            l "T’es le boss ! T’as identifié le biais d’autorité. Le témoignage n'était pas fiable."  # Feedback mauvais biais
+            l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            $ quete3_score += 1
+            jump temoignage_3
+        "Confirmation":
+            l "Je crois que c’est plutôt un biais d’autorité. Mais déjà bravo d’avoir capté que le témoignage était biaisé."  # Feedback mauvais biais
+            l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            $ quete3_score += 1
+            jump temoignage_3
+        "Corrélation illusoire":  # Option pour choisir le biais de corrélation illusoire
+            l "Je crois que c’est plutôt un biais d’autorité. Mais déjà bravo d’avoir capté que le témoignage était biaisé."  # Lola félicite le joueur
+            l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            $ quete3_score += 1  # Augmente le score du joueur de 1
+            jump temoignage_3  # Saute vers le témoignage suivant
+        "fiable":
+            l "Hmm… Ok, moi je trouve qu’il fait confiance un peu vite à ce Youtubeur, en plus il dit même pas qui c’est … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
+            l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+    $ quete3_score -= 1  # Score = -1
+    $ témoignages_récupérés.append("Témoignage 2 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
+    jump temoignage_3  # Saute vers le témoignage suivant
+    
+label temoignage_3:
+    #scene forum (manque image)
+    #show avatar_témoin_2 (manque visuel avatar) 
+    #On peut peut-être mettre une pastille comme une photo d'avatar/de profil d'un forum pour illustrer ?
+
+    # Texte du témoignage
+    "« Une récente enquête menée par un collectif de journalistes indépendants montre que la violence dans les collèges reste stable malgré la popularité des jeux vidéo. J’ai même le liens de l’enquête si vous voulez. »"
+
+    menu:  # Crée un menu avec les options de choix pour le joueur
+        "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            l "Parfait ! Ce témoignage est fiable et précieux pour notre article. En plus il a même mis le lien vers l'enquête, c'est top !" # Feedback bonne réponse
+            l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            $ quete3_score += 1
+            $ témoignages_récupérés.append("Témoignage 3 (Fiable)")
+            jump témoignage_4
+
+        "Analyser ce témoignage":  # Option pour analyser le témoignage
+            jump analyse_biais_3  # Saute vers l'analyse du témoignage
+
+    return  
+
+# Analyse du troisième témoignage
+label analyse_biais_3:
+    menu:  # Crée un menu avec des options pour le joueur
+        "Quel biais cognitif identifiez-vous ?"  # Question posée au joueur
+        "Autorité":  # Option pour choisir le biais d'autorité
+            l "T’es sur ? Pourtant il parle de journaliste indépendant, met sa source et tout, j’ai vraiment cru que c’était fiable. Mais bon c’est toi le spécialiste hein !"  # Feedback mauvaise réponse
+            l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            $ quete3_score -= 1  # Score = -1
+            jump témoignage_4
+        "Confirmation":
+            l "T’es sur ? Pourtant il parle de journaliste indépendant, met sa source et tout, j’ai vraiment cru que c’était fiable. Mais bon c’est toi le spécialiste hein !"  # Feedback mauvaise réponse
+            l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            $ quete3_score -= 1  # Score = -1
+            jump témoignage_4
+        "Corrélation illusoire":  # Option pour choisir le biais de corrélation illusoire
+            l "T’es sur ? Pourtant il parle de journaliste indépendant, met sa source et tout, j’ai vraiment cru que c’était fiable. Mais bon c’est toi le spécialiste hein !"  # Feedback mauvaise réponse
+            $ quete3_score -= 1  # Score = -1  # Augmente le score du joueur de 1
+            jump témoignage_4  # Saute vers le témoignage suivant
+        "fiable":
+            l "Parfait ! Ce témoignage est fiable et précieux pour notre article. En plus il a même mis le lien vers l'enquête, c'est top !" # Feedback bonne réponse
+            l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            $ quete3_score += 1
+    $ témoignages_récupérés.append("Témoignage 2 (Fiable)")  # Ajoute le témoignage à la liste des témoignages récupérés
+    jump témoignage_4  # Saute vers le témoignage suivant
+
+    label témoignage_4:
+    #scene forum (manque image)
+    #show avatar_témoin_2 (manque visuel avatar) 
+    #On peut peut-être mettre une pastille comme une photo d'avatar/de profil d'un forum pour illustrer ?
+
+    # Texte du témoignage
+    "« J’ai lu plein d’articles expliquant que les jeux vidéo augmentent l’agressivité, ils en parlent tout le temps sur TikTok et tous mes amis pensent la même chose. Ça ne peut pas être une coïncidence.»"
+    menu:  # Crée un menu avec les options de choix pour le joueur
+        "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            l "Ah ouais … Ok. Moi je trouve pas que ce qu’il dit soit basé sur des infos vraiment fondées son témoignage, puis bon il cite même pas les articles, et alors TikTok moi j’suis pas sûre de valider … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
+            l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
+            $ quete3_score -= 1  # Score = -1
+            $ témoignages_récupérés.append("Témoignage 2 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
+            jump conclusion_quete3  # Saute vers le témoignage suivant
+
+        "Analyser ce témoignage":  # Option pour analyser le témoignage
+            jump analyse_biais_4  # Saute vers l'analyse du témoignage
+
+    return  
+
+# Analyse du premier témoignage
+label analyse_biais_4:
+    menu:  # Crée un menu avec des options pour le joueur
+        "Quel biais cognitif identifiez-vous ?"  # Question posée au joueur
+        "Autorité":  # Option pour choisir le biais d'autorité
+            l "Je crois que c’est plutôt un biais de confirmation. Mais déjà bravo d’avoir capté que le témoignage était biaisé."  # Feedback mauvais biais
+            l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
+            $ quete3_score += 1
+            jump conclusion_quete3
+        "Confirmation":
+            l "T’es le boss ! T’as identifié le biais de confirmation. Le témoignage n'était pas fiable." # Feedback bonne réponse
+            l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
+            $ quete3_score += 1
+            jump conclusion_quete3
+        "Corrélation illusoire":  # Option pour choisir le biais de corrélation illusoire
+            l "Je crois que c’est plutôt un biais de confirmation. Mais déjà bravo d’avoir capté que le témoignage était biaisé."  # Feedback mauvais biais
+            l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
+            $ quete3_score += 1  # Augmente le score du joueur de 1
+            jump conclusion_quete3  # Saute vers le témoignage suivant
+        "fiable":
+            l "Ah ouais … Ok. Moi je trouve pas que ce qu’il dit soit basé sur des infos vraiment fondées son témoignage, puis bon il cite même pas les articles, et alors TikTok moi j’suis pas sûre de valider … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
+            l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
+    $ quete3_score -= 1  # Score = -1
+    $ témoignages_récupérés.append("Témoignage 4 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
+    jump conclusion_quete3  # Saute vers le témoignage suivant
+
+
+label conclusion_quete3:
+    scene club_journalisme
+
+    $ score = quete3_score  # Enregistre le score de la quête 3
+    $ quetes_complete += 1  # Incrémente le nombre de quêtes complétées
+
+    if quete3_score >= 3:
+        l "Bravo, grâce à toi on a des témoignages vraiment fiables pour l’article..."
+    elif quete3_score >= 2:
+        l "Je pense que tu as peut-être fait quelques erreurs, mais l'important est que tu as su repérer des messages douteux..."
+    else:
+        l "Avec un peu de recul, je ne suis pas trop sûre de tes choix..."
+        
+    return

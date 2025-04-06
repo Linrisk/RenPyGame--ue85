@@ -1,6 +1,7 @@
 ﻿# Définition des personnages
 define e = Character("Accueil Perso", color="#42aaff")
 define p = Character("Professeur", color="#ff8c00")
+define c_proviseur = Character("Proviseur", color="#800000")  
 define d = Character("Directeur", color="#008000")
 define el = Character("Élève", color="#ff1493")
 define l = Character("Lola", color="#4b01c2")
@@ -12,6 +13,11 @@ image cdi_bg = "images/decor_4.png"
 image salle_info = "images/decor_6.png"
 image terrain_sport = "images/decor_7.png"
 image club_journalisme = "images/club_journalisme.jpg"
+
+# Images des lieux
+image bureau_proviseur = "images/backgrounds/b_bureau_proviseur.png"  # Image du bureau du proviseur
+image character_proviseur = "images/characters/c_proviseur.png"
+image telephone = "images/gui/telephone.png"  # Image du téléphone
 
 #Initialisation des variables de score par quête
 #default quete1_score = 0
@@ -42,8 +48,6 @@ init :
         "emploi_temps": {"name": "Emploi du temps", "image": "images/item_emploi.png", "description": "L'emploi du temps de l'élève accusé. Il était en sport lors de l'envoi."},
         "journal_cdi": {"name": "Registre du CDI", "image": "images/item_registre.png", "description": "Liste des élèves présents au CDI ce jour-là."},
         "capture_ecran": {"name": "Capture d'écran", "image": "images/item_capture.png", "description": "Preuve de connexion à l'ENT à une heure suspecte."}
-
-   
     }
 
 init python:
@@ -75,43 +79,6 @@ screen mouse_position():
     text "[mousepos]" xalign 0.5 yalign 0.95
     timer 0.1 action [SetVariable("mousepos", str(renpy.get_mouse_pos())), Show("mouse_position")]
 
-# Inventaire
-screen inventory_screen():
-    modal True
-    
-    frame:
-        background "gui/frame.png"
-        xalign 0.5
-        yalign 0.5
-        xsize 800
-        ysize 600
-        
-        vbox:
-            spacing 20
-            xalign 0.5
-            yalign 0.0
-            text "Inventaire" size 40 xalign 0.5
-            
-            grid 5 2:
-                spacing 10
-                xalign 0.5
-                for item_id in inventory:
-                    frame:
-                        xsize 150
-                        ysize 150
-                        imagebutton:
-                            idle items[item_id]["image"]
-                            action Show("item_description", item_id=item_id)
-                            xalign 0.5
-                            yalign 0.5
-                # Remplir avec des slots vides
-                for i in range(max_items - len(inventory)):
-                    frame:
-                        xsize 150
-                        ysize 150
-                        text "Vide" xalign 0.5 yalign 0.5
-        
-        textbutton "Fermer" action Hide("inventory_screen") xalign 0.5 yalign 0.95
 
 # Detail des objets maggle
 screen item_description(item_id):
@@ -135,28 +102,210 @@ screen item_description(item_id):
             
         textbutton "Fermer" action Hide("item_description") xalign 0.5 yalign 0.95
 
+
+##océ#
+
+
+
+
+
+# Écran de tutoriel pour l'inventaire
+screen tutoriel_inventaire():
+    modal True
+    frame:
+        background "gui/frame.png"
+        xalign 0.5
+        yalign 0.5
+        xsize 800
+        ysize 600
+
+        vbox:
+            spacing 20
+            xalign 0.5
+            yalign 0.1
+            text "Votre Inventaire" size 40 xalign 0.5
+
+            text "Fonctionnalités:" size 30 xalign 0.5Z
+            text "• Voir les objets récoltés" xalign 0.5
+            text "• Utiliser les objets pour progresser" xalign 0.5
+            text "• Gérer les objets importants" xalign 0.5
+
+      
+        textbutton "J'ai compris" action [Hide("tutoriel_inventaire"), Return()] xalign 0.5 yalign 0.95
+
+
+# Inventaire
+screen inventory_screen():
+    modal True
+
+    frame:
+        background "gui/frame.png"
+        xalign 0.5
+        yalign 0.5
+        xsize 800
+        ysize 600
+
+        vbox:
+            spacing 20
+            xalign 0.5
+            yalign 0.0
+            text "Inventaire" size 40 xalign 0.5
+
+            grid 5 2:
+                spacing 10
+                xalign 0.5
+                for item_id in inventory:
+                    frame:
+                        xsize 150
+                        ysize 150
+                        imagebutton:
+                            idle items[item_id]["image"]
+                            action Show("item_description", item_id=item_id)
+                            xalign 0.5
+                            yalign 0.5
+                # Remplir avec des slots vides
+                for i in range(max_items - len(inventory)):
+                    frame:
+                        xsize 150
+                        ysize 150
+                        text "Vide" xalign 0.5 yalign 0.5
+
+        textbutton "Fermer" action Hide("inventory_screen") xalign 0.5 yalign 0.95
+
 # Destinations
 label start:
-    show screen debug_mouse_position
-    scene black
-    with fade
-    e "Bienvenue, enquêteur en herbe ! Il faut innocenter l'élève et trouver le véritable coupable."
-    e "Nous avons plusieurs lieux à explorer. Choisis où commencer."
-    e "Appuie sur la touche E à tout moment pour accéder à ton inventaire."
-
-    menu:
-        "Quete 1":
-            jump quete_1
-        "Quete 2":
-            jump quete_2
-        "Quete 3":
-            jump quete_3
-    
-    # Initialisation des touches pour l'inventaire
+    # Configuration des touches et écrans
     $ config.keymap['inventory'] = ['e', 'E']
     $ config.underlay.append(renpy.Keymap(inventory=lambda: renpy.show_screen('inventory_screen')))
-    
+    show screen debug_mouse_position
+
+    scene bureau_proviseur
+    with fade
+
+    "Vous êtes convoqués dans le bureau du proviseur avec les autres membres du club journalisme."
+
+    show c_proviseur at center
+
+    c_proviseur "Merci d'être venus si rapidement. Nous avons une situation délicate entre les mains."
+
+    c_proviseur "Il y a des rumeurs qui circulent dans tout le collège. Une vague de désinformation secoue l'établissement, et tout le monde semble se laisser emporter."
+
+    c_proviseur "C'est cette vidéo qui a tout déclenché..."
+
+    hide c_proviseur
+
+    scene black
+
+    play movie "videos/v_deepfake.mp4"
+    show movie
+
+    "Voici une vidéo à propos des deepfakes."
+
+    stop movie
+    hide movie
+
+    "La vidéo est terminée."
+
+    "La vidéo montre Paul, un élève de 5ème, en train de frapper un mur du collège avec ce qui ressemble à une pioche."
+
+    "On l'entend dire : « Je vais trouver du diamant comme dans Minecraft ! »"
+
+    "Les commentaires sous la vidéo s'enflamment, accusant les jeux vidéo de pousser les adolescents à des comportements violents."
+
+    hide video_tiktok
+    show c_proviseur at center
+    with dissolve
+
+    c_proviseur "Cette vidéo est devenue virale. Les parents s'inquiètent, les médias locaux commencent à s'intéresser à l'affaire."
+
+    c_proviseur "Mais je soupçonne que la situation est plus complexe qu'elle n'y paraît."
+
+    c_proviseur "J'ai besoin que votre club journalisme mène l'enquête pour démêler le vrai du faux."
+
+    c_proviseur "Vous devrez recueillir des témoignages, analyser les sources d'information et publier un article qui rétablira la vérité."
+
+    c_proviseur "Pour mener cette mission à bien, vous aurez accès à un inventaire pour gérer les objets que vous récolterez."
+
+    show inventory at right
+    with moveinright
+
+    c_proviseur "Il vous permettra de voir les objets récoltés, de les utiliser pour progresser dans votre enquête, et de gérer les objets importants."
+
+    c_proviseur "Je vous ai débloqué tous les accès, vous devriez y jeter un œil."
+
+    # Lancement du tutoriel de l'inventaire
+    call screen tutoriel_inventaire
+
+    hide inventory
+
+    c_proviseur "Bonne chance dans votre enquête. La réputation de Paul et la perception des jeux vidéo au sein de notre établissement sont entre vos mains."
+
+    hide c_proviseur
+    with dissolve
+
+    e "Maintenant que nous avons notre mission, nous devons organiser notre enquête. Retournons au club journalisme!"
+
     jump map_screen
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##
 
 # Carte
 label map_screen:
@@ -173,7 +322,7 @@ screen map_interactive():
         #Memento, image en 1920x1080 importantes!
 
 
-        # Salle des profs 
+        # Club journalisme
         hotspot (290, 250, 200, 150) action Jump("professeur")
         
         # CDI 

@@ -14,11 +14,18 @@ image salle_profs = "images/decor_3.png"
 image cdi_bg = "images/decor_4.png"
 image b_salle_info = "images/backgrounds/b_salle_info.png"
 image b_couloirs = "images/backgrounds/b_couloirs.png"
-image club_journalisme = "images/club_journalisme.jpg"
+image b_couloirs_2 = "images/backgrounds/b_couloirs.png"
+image b_club = "images/club_journalisme.jpg"
+image b_salle_technicien = "images/backgrounds/b_salle_technicien.png"  # Image de la salle de la technicienne
 
 # Images des lieux
 image bureau_proviseur = "images/backgrounds/b_bureau_proviseur.png"  # Image du bureau du proviseur
-image character_proviseur = "images/characters/c_proviseur.png"
+image l = "images/characters/c_lola.png"
+image character_ethan = "images/characters/c_ethan.png"
+image character_enzo_ = "images/characters/c_enzo.png"
+image character_alexis_ = "images/characters/c_alexis.png"
+image technicienne = "images/characters/c_taisya.png"
+image c_proviseur = "images/characters/c_proviseur.png"
 image telephone = "images/gui/telephone.png"  # Image du téléphone
 
 # Initialisation des variables de score par quête

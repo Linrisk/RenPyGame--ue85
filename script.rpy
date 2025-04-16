@@ -7,6 +7,8 @@ define l = Character("Lola", color="#4b01c2")
 define alexis = Character("Alexis (Rédacteur)", color="#00bfff")
 define technicienne = Character("Technicienne", color="#ff69b4")
 define respo_interview = Character("Responsable d'interview", color="#32cd32")
+define lucas = Character("Lucas", color="#fff200")
+define ethan = Character("Ethan", color="#a068ff")
 
 # Images des lieux
 image map_overlay = "images/decor_8_hover.png"  # Image avec surbrillance des zones
@@ -14,17 +16,23 @@ image salle_profs = "images/decor_3.png"
 image cdi_bg = "images/decor_4.png"
 image b_salle_info = "images/backgrounds/b_salle_info.png"
 image b_couloirs = "images/backgrounds/b_couloirs.png"
-image b_couloirs_2 = "images/backgrounds/b_couloirs.png"
-image b_club = "images/club_journalisme.jpg"
+image b_couloirs_2 = "images/backgrounds/b_couloirs_2.png"
+image b_club = "images/b_club.png"
 image b_salle_technicien = "images/backgrounds/b_salle_technicien.png"  # Image de la salle de la technicienne
 
-# Images des lieux
+# Images des personnages
 image bureau_proviseur = "images/backgrounds/b_bureau_proviseur.png"  # Image du bureau du proviseur
 image l = "images/characters/c_lola.png"
-image character_ethan = "images/characters/c_ethan.png"
+image c_ethan = "images/characters/c_ethan.png"
+image c_ethan_2 = "images/characters/c_ethan_2.png"
+image c_lucas_enerve = "images/characters/c_lucas_enerve.png"
+image c_lucas_normal = "images/characters/c_lucas_enerve.png"
+image c_alice_sourit = "images/characters/c_alice_sourit.png"
+image c_alice_triste = "images/characters/c_alice_triste.png"
 image character_enzo_ = "images/characters/c_enzo.png"
-image character_alexis_ = "images/characters/c_alexis.png"
-image technicienne = "images/characters/c_taisya.png"
+image character_alexis_sourit = "images/characters/c_alexis_sourit.png"
+image character_alexis_sourit_pas = "images/characters/c_alexis_sourit.png"
+image technicienne = "images/characters/c_alice_sourit.png"
 image c_proviseur = "images/characters/c_proviseur.png"
 image telephone = "images/gui/telephone.png"  # Image du téléphone
 
@@ -41,6 +49,10 @@ default quete3_opportunity = 4 # 4 possibilités de bien répondre et donc 4 poi
 
 # Variable pour les témoignages récupérés par le joueur dans la quête 3
 default témoignages_récupérés = []  # Initialise une liste vide pour stocker les témoignages récupérés par le joueur
+
+#Variable quête 1, pour que le jeu vérifie quand le joueur a parlé à lucas et ethan et ne pas répéter les dialogues
+default a_parle_a_lucas = False
+default a_parle_a_ethan = False
 
 # Initialisation des variables
 init:
@@ -64,7 +76,10 @@ init:
         "cle_usb": {"name": "Clé USB", "image": "images/item_cle_usb.png", "description": "Contient des fichiers suspects datés du jour de l'incident."},
         "emploi_temps": {"name": "Emploi du temps", "image": "images/item_emploi.png", "description": "L'emploi du temps de l'élève accusé. Il était en sport lors de l'envoi."},
         "journal_cdi": {"name": "Registre du CDI", "image": "images/item_registre.png", "description": "Liste des élèves présents au CDI ce jour-là."},
-        "capture_ecran": {"name": "Capture d'écran", "image": "images/item_capture.png", "description": "Preuve de connexion à l'ENT à une heure suspecte."}
+        "capture_ecran": {"name": "Capture d'écran", "image": "images/item_capture.png", "description": "Preuve de connexion à l'ENT à une heure suspecte."},
+        "article_lucas": {"name": "Article de Lucas", "image": "images/item_article_lucas.png", "description": "Tu vas l'analyser plus tard avec Alexis."},
+        "article_ethan": {"name": "Article d'Ethan", "image": "images/item_article_ethan.png", "description": "Tu vas l'analyser plus tard avec Alexis."},
+
     }
 
 init python:
@@ -348,13 +363,378 @@ label retour_avant_quete:
     return
 
 #Quête 1 - Témoignages
+#Etape 1 discussion avec le rédacteur, Alexis, début de la quête
+
 label quete_1:
     scene b_couloirs
-    with fade
+    with fade #permet une transition visuelle progressive
+
+    show c_alexis_sourit #affiche le personnage avec une expression choisi
 
     alexis "Parfait, allons-y. Je pense que pour commencer il faudrait que tu ailles chercher des témoignages."
 
-    # Ajoute ici les étapes de la quête...
+    alexis "Et si tu allais parler à Ethan et Lucas, j'ai entendu dire qu'ils ont des opinions très différents sur les jeux vidéo !"
+
+    alexis "Tu pourras sûrement les trouver dans les couloirs et le hall car ils n'ont pas cours actuellement."
+
+
+#j'ai rajouté une option pour choisir à qui parler en premier, après peut-être que le joueur pourra s'y rendre lui-même en utilisant la map ?
+
+label choix_destination:
+    "C'est parti, est-ce que je commence par le hall ou les couloirs ?"
+    menu:
+        "Aller aux couloirs":
+            jump scene_couloirs #emmène le joueur pour parler à Lucas
+            
+        "Aller au hall":
+            jump scene_hall #emmène le joueur pour parler à Ethan
+
+#Etape 2, récupération de témoignages oraux
+
+#scène du témoignage de Lucas
+
+label scene_couloirs:
+
+    scene b_couloirs_2
+
+    with fade
+
+    show c_lucas_normal
+
+    lucas "Ce que je pense des jeux vidéo ? Déjà, pas pareil qu'Ethan qui dit n’importe quoi." 
+
+    lucas "Il a lu un article et maintenant il croit qu’il a tout compris." 
+
+    lucas "Franchement, dire que les jeux vidéo rendent violent, c’est juste un truc que les adultes répètent pour nous faire peur."
+
+    show c_lucas_enerve
+
+    lucas "Moi, je joue tout le temps, et j’suis pas devenu une brute, hein !"
+
+    lucas "Il raconte que son pote s’énerve plus qu’avant parce qu’il joue à des jeux de baston… Mais ça veut rien dire !"
+
+    lucas "Peut-être que ce mec a juste des soucis, ou qu’il est fatigué, ou j’sais pas…"
+
+    lucas "Mais c’est pas un jeu qui va le transformer en bagarreur ! Sinon, tous ceux qui jouent à Mario, ils passeraient leur temps à sauter sur les gens, non ?"
+
+    lucas "En plus, moi aussi, j’ai lu un article là-dessus, et il disait que les jeux vidéo, ça aide justement à gérer ses émotions."
+
+    show c_lucas_normal
+
+    lucas "Les chercheurs ont fait des tests, et ils ont vu que ça peut même réduire le stress."
+
+    lucas "Alors peut-être que certains s’énervent plus en jouant, mais d’autres, au contraire, ça les calme !" 
+
+    lucas "Et puis, y’a aussi des études qui prouvent que les jeux vidéo, ça aide à se concentrer, à être plus stratège, et même à mieux travailler en équipe."
+
+    show c_lucas_enerve 
+
+    lucas "Mais Ethan, il veut pas entendre ça, il préfère croire que dès qu’on touche une manette, on devient un monstre."
+
+    menu:    #permet au joeur de choisir entre deux options
+        "Si des scientifiques le disent, alors ça doit être vrai.":
+            "Tu acceptes l'information sans poser de question."
+            $ quete2_score -= 1  # mauvais choix, ne gagne pas de points
+
+        "Est-ce que tu as une source pour ce que tu dis ?":
+            lucas "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
+            $ quete2_score += 1  # bon choix, gagne 1 point
+            $ add_to_inventory("article_lucas")# ajoute l'article de Lucas à l'inventaire
+            "Tu as obtenu l'article de Lucas. Tu pourras aller en vérifier la fiabilité !"
+        
+    $ a_parle_a_lucas = True # variable avec dollar qu'on peut utiliser au cours du jeu, ici elle sert à vérifier que le joueur a bien parlé avec Lucas (variable originelle avant start du jeu)
+   
+    if a_parle_a_lucas and a_parle_a_ethan: #variable qui permet que si le joueur a déjà parlé avec ethan et lucas, alors il peut aller au club de journalisme, mais si non il est mené à la conversation qui lui manque
+        jump reflexion_apres_discussions
+    else:
+        jump choix_destination #si le joeur n'a pas encore parlé à l'un des deux personnages, il est renvoyé au choix de destination
+
+
+# Scène témoignage d'Ethan
+
+label scene_hall:
+
+    scene b_hall
+
+    with fade
+
+    show c_ethan
+
+    ethan "Mon avis sur les jeux vidéo ? Bah moi, j’suis sûr que ça rend violent." 
+
+    ethan "J’ai lu un article là-dessus, et franchement, ça fait flipper. Ils disent que quand tu joues trop à des jeux où tu tapes ou tu tires sur des gens, ben ton cerveau, il s’habitue à la violence. Du coup, après, t’es plus agressif sans t’en rendre compte."
+
+    ethan "Et là, y’a Lucas qui me sort que c’est n’importe quoi, que lui, il joue tout le temps et qu’il est pas violent du tout."
+
+    ethan "Mais j’suis désolé, c’est pas parce que LUI il se contrôle que c’est pareil pour tout le monde !"
+
+    show c_ethan_2
+
+    ethan "Genre, j’connais un pote, il joue que à des jeux où faut se battre, et ben il s’énerve super vite maintenant."
+
+    ethan "Avant, il était grave cool, mais là, il part au quart de tour pour rien."
+
+    ethan "Même les scientifiques l’ont prouvé, y’a des études qui montrent que ça change notre façon de réagir."
+
+    ethan "Mais Lucas, il veut rien entendre ! Il dit que c’est juste un truc que les adultes répètent pour faire peur."
+
+    ethan "Franchement, il abuse. Après, j’dis pas que tous ceux qui jouent deviennent des criminels, hein, mais bon…"
+
+    ethan "À force, ça doit bien avoir un effet. Et puis, si ça rendait pas violent, pourquoi yaurait autant de bagarres à l’école, hein ? J’suis sûr que y’a un lien !"
+
+    menu: #ouvre des choix après le dialogue
+        "Si des scientifiques le disent, alors ça doit être vrai.":
+            "Tu acceptes l'information sans poser de question."
+            $ quete2_score -= 1  # Mauvais choix
+
+        "Est-ce que tu as une source pour ce que tu dis ?":
+            show c_ethan
+            ethan "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
+            $ quete2_score += 1  # Bon choix
+            $ add_to_inventory("article_ethan")# Ajoute l'article d'Ethan à l'inventaire
+            "Tu as obtenu l'article d'Ethan. Tu pourras aller en vérifier la fiabilité !"
+
+    $ a_parle_a_ethan = True #valide auprès du jeu que le joueur a parlé à Ethan
+    #variable qui ramène le joueur au choix de destination s'il doit encore parler à un personnage
+    if a_parle_a_lucas and a_parle_a_ethan:
+        jump reflexion_apres_discussions
+    else:
+        jump choix_destination
+
+
+#Etape 3 la vérification de l'obtention des sources
+
+#Scène intermédiaire
+label reflexion_apres_discussions:
+    scene b_couloirs
+    with fade
+
+    
+    "Maintenant que j'ai parlé à Lucas et Ethan, peut-être devrais-je retourner parler à Alexis?"
+    "Il doit m'attendre au club de journalisme."
+
+
+    jump club_journalisme #le joueur est amené au label suivant
+
+
+
+label club_journalisme:
+    scene b_club
+    with fade
+
+    show c_alexis_sourit
+
+    alexis "Ah, te voilà! Alors, as-tu trouvé des informations intéressantes ?"
+
+    # Vérification des articles dans l'inventaire
+    if "article_lucas" in inventory and "article_ethan" in inventory:
+        alexis "Super ! Je vois que tu as collecté les deux articles dont nous avions besoin."
+        jump scene_analyse_fiabilité
+
+    elif "article_lucas" not in inventory:
+        show c_alexis_sourit_pas
+        alexis "Hmm, il te manque quelque chose. Il faudrait peut-être retourner voir Lucas dans les couloirs ?"
+        $ a_parle_a_lucas = False
+        jump scene_couloirs_retour
+
+    elif "article_ethan" not in inventory:
+        show c_alexis_sourit_pas
+        alexis "Hmm, il te manque quelque chose. Tu devrais peut-être retourner parler à Ethan dans le hall ?"
+        $ a_parle_a_ethan = False
+        jump scene_hall_retour
+
+
+
+#scène vers laquelle le joueur est amené s'il n'a pas obtenu l'article de Lucas
+label scene_couloirs_retour:
+    scene b_couloirs_2
+    show  c_lucas_normal
+    
+    lucas "Tiens, tu reviens ? Tu veux qu'on reparle des jeux vidéo ?"
+    lucas "Franchement, je comprends pas pourquoi certains pensent encore que c'est dangereux..."
+    lucas "Mais si tu veux, je peux te renvoyer l'article dont je parlais."
+
+    menu:
+        "Oui, je veux bien le lien vers ton article.":
+            lucas "Pas de souci. Voilà !"
+            $ inventory["Article Lucas"] = 1 #obtiens l'article de Lucas
+            $ a_parle_a_lucas = True #confirme à nouveau que le joueur a parlé à Lucas, il peut à nouveau être renvoyé vers le club et montrer sa source à Alexis
+            "Tu as obtenu l'article de Lucas. Tu pourras aller en vérifier la fiabilité !"
+            jump retour_au_club
+
+        "Non, c'est bon, je voulais juste repasser.":
+            lucas "Okay, comme tu veux !"
+            jump retour_au_club
+
+#scène où le joueur est amené s'il n'a pas obtenu l'article d'Ethan
+label scene_hall_retour:
+    scene b_hall
+    show c_ethan
+    
+    ethan "Ah, tu veux encore parler des jeux vidéo ? Lucas t’a encore embrouillé, c’est ça ?"
+
+    show c_ethan_2
+
+    ethan "Mais je maintiens ce que j’ai dit. Et puis j’avais un article très sérieux, c’est pas moi qui invente !"
+
+    menu:
+        "Tu peux me donner le lien de ton article ?":
+            ethan "Bien sûr. Tiens, le voilà."
+            $ inventory["Article Ethan"] = 1 #ajoute l'article d'Ethan à l'inventaire
+            $ a_parle_a_ethan = True #reconfirme que le joueur a parlé à Ethan
+            "Tu as obtenu l'article d'Ethan. Tu pourras aller en vérifier la fiabilité !"
+            jump retour_au_club
+
+        "Non merci, je repasserai peut-être plus tard.": #si le joueur choisi cette option, il est amené au club où il sera encouragé à parler encore à Ethan
+            ethan "Pas de souci."
+            jump retour_au_club
+
+#scène intermédiaire que le joueur obtient quand il a bien demandé leurs sources à Ethan et Lucas
+label retour_au_club:
+    "Bon, je crois que j'ai ce qu'il faut maintenant. Retournons voir Alexis."
+    jump club_journalisme
+
+
+#Dernière étape : analyse des articles
+#Partie 1 = analyse de l'article d'Ethan (je vais améliorer le côté visu après d'abord je vérifie que tt fonctionne bien après intégration de la quête)
+label scene_analyse_fiabilité:
+
+    scene b_zoom_ordi_club
+
+    alexis "Alors, voilà l'article d'Ethan. Regarde bien le titre :"
+
+    #montre les deux articles à la fois
+
+    show article_ecran_general1 at left
+    show article_ecran_general2 at right
+
+    with fade
+
+    alexis "« Santé : 10 raisons pour lesquelles les appareils électroniques devraient être interdits aux enfants ! »"
+    alexis "Oula… Ça annonce direct la couleur, non ? On dirait presque une alerte rouge !"
+
+    #cache les deux articles
+    hide article_ecran_general1
+    
+    hide article_ecran_general2
+
+    #montre spécifiquement le titre pour l'analyser de plus près
+
+    show article_ecran_titre at truecenter
+
+    with fade
+
+    alexis "Déjà, ce titre est super alarmiste. Il dit qu’on devrait interdire les écrans aux enfants… mais sans expliquer à partir de quel âge, dans quel contexte, ou même de quels écrans on parle."
+    alexis "C’est ce qu’on appelle du *sensationnalisme*. Ça fait peur, ça attire l’œil, mais ce n’est pas très sérieux."
+
+    hide article_ecran_titre
+
+    #montre spécifiquement un paragraphe pour l'analyser de plus près
+
+    show article_ecran_paragraphe at truecenter
+    with fade
+
+    alexis "Regarde maintenant ce paragraphe : il parle de plein de dangers des écrans, comme des maladies mentales ou des retards de développement."
+    alexis "Mais il ne donne pas de sources précises. Et certaines infos sont exagérées, voire fausses !"
+    alexis "Par exemple, il dit qu’un enfant sur trois a un retard de développement en entrant au lycée… mais aucune étude sérieuse ne dit ça."
+
+    hide article_ecran_paragraphe
+
+    #montre spécifiquement le dernier paragraphe pour l'analyser de plus près
+
+    show article_ecran_conclusion at truecenter
+    with fade
+
+    alexis "Et le pire, c’est qu’il n’y a aucun contrepoint. Aucune info sur les bons côtés des écrans : apprendre, communiquer, s’amuser…"
+    alexis "Un article fiable, lui, aurait donné plusieurs points de vue, des chiffres vérifiables, et des conseils d’experts."
+
+    hide article_ecran_conclusion
+
+    alexis "Alors, est-ce que les écrans sont dangereux ? Pas forcément. Ce qui compte, c’est comment on les utilise."
+    alexis "Les spécialistes recommandent de ne pas les interdire, mais de les utiliser intelligemment, avec l’aide des parents."
+    alexis "Bref, avant de croire un article comme celui-là, pose-toi toujours des questions. C’est comme ça qu’on devient un lecteur malin !"
+
+    jump scene_analyse_article_fiable #transporte le joueur à la lecture du prochain article
+
+#Partie 2 = analyse de l'article de Lucas (à améliorer graphiquement aussi)
+
+label scene_analyse_article_fiable:
+
+    scene b_zoom_ordi_club
+ 
+
+    alexis "Bon, maintenant regardons l'article de Lucas."
+    alexis "C’est une bonne occasion de voir comment on peut bien informer."
+
+    show article_lucas_general at truecenter #truecenter permet de montrer une image au centre parfait de l'écran de jeu
+    with dissolve
+
+    alexis "Voici un article qui parle d’un sujet sensible : le lien entre jeux vidéo et violence."
+    alexis "Mais tu vas voir, il est bien plus rigoureux et nuancé que le précédent."
+
+    hide article_lucas_general
+    with fade
+
+    #titre séparé qui apparaît en plus gros
+    show article_lucas_titre at truecenter
+    with dissolve #type de transition visuelle
+
+    alexis "Déjà, regarde le titre. Il n’exagère rien, ne fait pas de raccourci, et ne cherche pas à faire peur."
+    alexis "C’est un bon point de départ : un article fiable pose les choses calmement."
+
+    hide article_lucas_titre
+    with fade
+    #paragraphe séparé qui apparaît en plus gros
+
+    show article_lucas_paragraphe1 at truecenter
+    with dissolve
+
+    alexis "Ici, on voit que l’article s’appuie sur des études scientifiques sérieuses."
+    alexis "Il cite des chercheurs connus, comme Christopher Ferguson ou Karen Sternheimer. C’est important, parce qu’ils travaillent vraiment sur le sujet."
+
+    hide article_lucas_paragraphe1
+    with fade
+    
+    #paragraphe 2 séparé qui apparaît en plus gros
+
+    show article_lucas_paragraphe2 at truecenter
+    with dissolve
+
+    alexis "L’article explique aussi que les jeux vidéo ne rendent pas violents. Il nuance, il ne nie pas tout, mais il met les choses en perspective."
+    alexis "Il parle de frustration, de stress temporaire… mais il montre que ce n’est pas pareil que de devenir violent."
+
+    hide article_lucas_paragraphe2
+    with fade
+    
+    #conclusion séparée qui apparaît en plus gros
+
+    show article_lucas_conclusion at truecenter
+    with dissolve
+
+    alexis "Enfin, il conclut en rappelant que le consensus scientifique est clair : il n’y a pas de lien direct entre jeux vidéo et violence."
+    alexis "Et surtout, il parle aussi des autres facteurs : l’environnement, la santé mentale, la famille… bref, il donne du contexte."
+
+    hide article_lucas_conclusion
+    with fade
+
+    alexis "Cet article est un bon exemple. Il est calme, nuancé, cite ses sources, et ne cherche pas à manipuler les émotions."
+    alexis "C’est ça, un article fiable !"
+
+    jump conclusion_quete1 #amène à la fin de la quête
+
+#Fin de la quête 1
+label conclusion_quete1:
+
+    $ score = quete1_score  # enregistre score quête 1
+    $ quetes_complete += 1  # informe le jeu qu'une quête a été complétée
+
+    scene b_club
+    with fade
+
+    show c_alexis_sourit
+    alexis "Bravo, tu as demandé les sources des informations que tu entendais quand c'était nécessaire et à présent tu sais à quels signes de fiabilité faire attention quand tu lis des articles de presse!"
+    
+    return 
 
     "Quête d'Alexis terminée."
     $ quests["alexis"] = True

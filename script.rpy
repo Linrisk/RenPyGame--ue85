@@ -3,10 +3,12 @@ define p = Character("Professeur", color="#ff8c00")
 define c_proviseur = Character("Proviseur", color="#800000")
 define d = Character("Directeur", color="#008000")
 define el = Character("Élève", color="#ff1493")
+#Lola est la technicienne du club - Quête 3 - Analyse des témoignages sur le Forum
 define l = Character("Lola", color="#4b01c2")
 define alexis = Character("Alexis (Rédacteur)", color="#00bfff")
 define technicienne = Character("Technicienne", color="#ff69b4")
-define respo_interview = Character("Responsable d'interview", color="#32cd32")
+#Responsable graphisme et photographie - Quête 2 - Analyse la vidéo deepfake
+define alice = Character("Responsable d'interview", color="#32cd32")
 define lucas = Character("Lucas", color="#fff200")
 define ethan = Character("Ethan", color="#a068ff")
 
@@ -22,7 +24,8 @@ image b_salle_technicien = "images/backgrounds/b_salle_technicien.png"  # Image 
 
 # Images des personnages
 image bureau_proviseur = "images/backgrounds/b_bureau_proviseur.png"  # Image du bureau du proviseur
-image l = "images/characters/c_lola.png"
+image c_lola = "images/characters/c_lola.png"
+image c_lola_p = "images/characters/c_lola_pensive.png"
 image c_ethan = "images/characters/c_ethan.png"
 image c_ethan_2 = "images/characters/c_ethan_2.png"
 image c_lucas_enerve = "images/characters/c_lucas_enerve.png"
@@ -34,7 +37,17 @@ image character_alexis_sourit = "images/characters/c_alexis_sourit.png"
 image character_alexis_sourit_pas = "images/characters/c_alexis_sourit.png"
 image technicienne = "images/characters/c_alice_sourit.png"
 image c_proviseur = "images/characters/c_proviseur.png"
+
+#images GUI
 image telephone = "images/gui/telephone.png"  # Image du téléphone
+image forum = "images/gui/bg_forum.png"
+image ordi_forum = "images/gui/bg_ordi_tech.png"
+
+#images Items
+image temoi1 = "images/items/T1.png"
+image temoi2 = "images/items/T2.png"
+image temoi3 = "images/items/T3.png"
+image temoi4 = "images/items/T4.png"
 
 # Initialisation des variables de score par quête
 default quete1_score = 0
@@ -53,6 +66,14 @@ default témoignages_récupérés = []  # Initialise une liste vide pour stocker
 #Variable quête 1, pour que le jeu vérifie quand le joueur a parlé à lucas et ethan et ne pas répéter les dialogues
 default a_parle_a_lucas = False
 default a_parle_a_ethan = False
+
+#Zoom personnage dialogues 
+init: 
+    transform zoom_perso:
+        zoom 1.2   # 1.0 = taille normale, 1.3 = 30% plus grand quand le personnage parle alors qu'ils sont plusieurs.    
+# Transform pour les autres personnages
+    transform taille_normale:
+        zoom 1.0
 
 # Initialisation des variables
 init:
@@ -79,7 +100,7 @@ init:
         "capture_ecran": {"name": "Capture d'écran", "image": "images/item_capture.png", "description": "Preuve de connexion à l'ENT à une heure suspecte."},
         "article_lucas": {"name": "Article de Lucas", "image": "images/item_article_lucas.png", "description": "Tu vas l'analyser plus tard avec Alexis."},
         "article_ethan": {"name": "Article d'Ethan", "image": "images/item_article_ethan.png", "description": "Tu vas l'analyser plus tard avec Alexis."},
-
+        "fiche_biais": {"name": "Fiche biais cognitifs", "image": "images/items/fiche_biais.png", "description": "Petit récap des définitions."}
     }
 
 init python:
@@ -209,11 +230,14 @@ label start:
 
     scene bureau_proviseur
     with fade
-
-    "Vous êtes convoqués dans le bureau du proviseur avec les autres membres du club journalisme."
+    "Bienvenu au collège Beausoleil"
+    "Vous êtes le.la responsable journalisme d'investigation du club de journalisme de l'établissement"
+    "Vous et vos amis membres du club êtes convoqués dans le bureau du proviseur."
+    "Un grave problème secoue le collège en ce moment, mais le proviseur va vous expliquer la situation en détail"
 
     show c_proviseur at center
 
+    c_proviseur "Bonjour à tous !"
     c_proviseur "Merci d'être venus si rapidement."
     c_proviseur "Nous avons une situation délicate entre les mains."
 
@@ -221,7 +245,7 @@ label start:
 
     c_proviseur "Une vague de désinformation secoue l'établissement..."
 
-    c_proviseur "C'est cette vidéo qui a tout déclenché..."
+    c_proviseur "C'est cette vidéo qui a tout déclenché, elle montre Paul un élève de 5ème dans une situation plus que délicate, je vous laisse juger par vous même de la situation"
 
     hide c_proviseur
 
@@ -230,18 +254,18 @@ label start:
     play movie "videos/v_deepfake.mp4"
     show movie
 
-    "Voici une vidéo à propos des deepfakes."
+    "..."
 
     stop movie
     hide movie
 
     "La vidéo est terminée."
 
-    "La vidéo montre Paul, un élève de 5ème, en train de frapper un mur du collège avec ce qui ressemble à une pioche."
+    show c_proviseur
+    c_proviseur "La vidéo montre donc Paul, un élève de 5ème, après qu'il ait fais un trou dans un mur du collège avec une pioche."
 
-    "On l'entend dire : « Je vais trouver du diamant comme dans Minecraft ! »"
-
-    "Les commentaires sous la vidéo s'enflamment, accusant les jeux vidéo de pousser les adolescents à des comportements violents."
+    c_proviseur "Les commentaires sous la vidéo s'enflamment, certains affirment qu'il se serait cru dans le jeu vidéo Minecraft et qu'il aura détruit le mur pour récolter du diamant, exactement comme dans le jeu !"
+    c_proviseur "Le vrai problème, la majorité des commentaires accusent les jeux vidéo de pousser les adolescents à des comportements violents, sans aucune nuance et surtout sans preuve ou source fiable."
 
     hide video_tiktok
     show c_proviseur at center
@@ -251,30 +275,37 @@ label start:
 
     c_proviseur "Mais je soupçonne que la situation est plus complexe qu'elle n'y paraît."
 
-    c_proviseur "J'ai besoin que votre club journalisme mène l'enquête pour démêler le vrai du faux."
+    c_proviseur "J'ai besoin que votre club de journalisme mène l'enquête pour démêler le vrai du faux."
 
-    c_proviseur "Vous devrez recueillir des témoignages, analyser les sources d'information et publier un article qui rétablira la vérité."
+    c_proviseur "Vous devrez recueillir des témoignages, analyser les sources d'information que vous pourrez trouver, analyser la vidéo de Paul et finalement publier un article fiable qui rétablira la vérité et apaisera tout le monde."
 
-    c_proviseur "Pour mener cette mission à bien, vous aurez accès à un inventaire pour gérer les objets que vous récolterez."
-
+    c_proviseur "Pour mener cette mission à bien, vous aurez accès à un inventaire."
+   
+    
     show inventory at right
     with moveinright
 
-    c_proviseur "Il vous permettra de voir les objets récoltés, de les utiliser pour progresser dans votre enquête, et de gérer les objets importants."
+    c_proviseur "Il vous permettra de voir les objets récoltés, et de les utiliser pour progresser dans votre enquête."
 
     c_proviseur "Je vous ai débloqué tous les accès, vous devriez y jeter un œil."
+
+    c_proviseur "Pour afficher l'inventaire appuyez sur la touche E du clavier. Cliquez ensuite sur Fermer pour le faire disparaitre."
+    hide c_proviseur
+    
 
     # Lancement du tutoriel de l'inventaire
     call screen tutoriel_inventaire
 
     hide inventory
 
-    c_proviseur "Bonne chance dans votre enquête. La réputation de Paul et la perception des jeux vidéo au sein de notre établissement sont entre vos mains."
+    show c_proviseur
+
+    c_proviseur "Bonne chance dans votre enquête. La réputation de Paul est en jeu, et la sauvegarde de l'esprit critique de nos élèves est entre vos mains."
 
     hide c_proviseur
     with dissolve
 
-    e "Maintenant que nous avons notre mission, nous devons organiser notre enquête. Retournons au club journalisme!"
+    "Maintenant que vous connaissez les détails de votre mission, vous devez organniser votre enquête. Rendez-vous dans la salle du club journalisme!"
 
     jump club_journalisme_intro
 
@@ -284,40 +315,55 @@ label club_journalisme_intro:
     scene club_journalisme
     with fade
 
-    "Vous êtes de retour au Club Journalisme, prêt à organiser votre enquête."
+    "Vous voici dans la salle du club de journalisme, prêt à organiser votre enquête avec les autres membres du club."
 
-    show alexis at left
+    show character_alexis_sourit at left, zoom_perso
     show technicienne at center
-    show respo_interview at right
+    show c_lola at right
 
-    alexis "Vu que tu es le responsable de l’investigation, le mieux, c’est que tu partes sur le terrain pour récolter un maximum d’informations."
+    alexis "Vu que tu es le.la responsable de l’investigation, le mieux, c’est que tu partes sur le terrain pour récolter un maximum d’informations."
 
-    alexis "On doit rédiger un article basé sur des faits vérifiés pour rétablir le calme dans le collège."
+    alexis "On doit rédiger un article fiable, basé sur des faits vérifiés pour rétablir le calme dans le collège, on est tous là en soutien mais tu es l'expert.e en investigation donc on te fait confiance."
 
-    alexis "Bien sûr, on pourra t’aider tout au long de tes recherches, mais fais attention : ramène des informations pertinentes, des sources fiables et ne te laisse pas avoir par la désinformation."
+    alexis "Bien sûr, on est tous spécialisés dans un domaine donc on pourra te donner des conseils dans tes recherches, mais fais attention : ramène des informations pertinentes, et surtout fais preuve d'esprit critique."
 
     # Dialogue avec Alexis (Rédacteur)
-    alexis "Pour commencer, j'ai entendu parler d'une source qui pourrait être intéressante. Enzo m'a dit que les jeux rendent violents parce qu’il a lu un article."
+    alexis "De mon côté, j'ai entendu parler d'une source qui pourrait être intéressante. Enzo répète a qui veut bien l'entendre que les jeux vidéos rendent violents et qu'il a des preuves, tu pourrai peut-être aller lui parler ?"
 
     alexis "Mais méfie-toi, il faut toujours vérifier la fiabilité des sources. Ne prends pas tout pour argent comptant."
 
+    show character_alexis_sourit at left, taille_normale
+    show technicienne at center, zoom_perso
+    show c_lola at right
+
     # Dialogue avec la Technicienne
-    technicienne "De mon côté, je peux t'aider à identifier les vidéos truquées et les deepfakes."
+    alice "De mon côté, je peux t'aider à analyser la vidéo dont parlait le proviseur, je suis spécialiste en images et vidéo comme tu le sais, ça peut-être un intéressant de regarder ça ensemble."
 
-    technicienne "Les influenceurs et les vidéos virales peuvent facilement manipuler l'opinion publique. Je vais analyser la vidéo de Paul pour voir si elle a été modifiée."
+    alice "Les influenceurs et les vidéos virales peuvent facilement manipuler l'opinion publique. Je vais déjà commencer à analyser la vidéo de Paul pour voir si elle a été modifiée."
 
-    # Dialogue avec le Responsable d’interview
-    respo_interview "Quant à moi, je vais m'assurer que les messages et les sources que nous utilisons sont fiables."
+    show character_alexis_sourit at left, taille_normale
+    show technicienne at center, taille_normale
+    show c_lola at right, zoom_perso
 
-    respo_interview "Je vais interroger les témoins et vérifier leurs déclarations. On ne peut pas se permettre de publier des informations non vérifiées."
+    # Dialogue avec la technicienne - Lola analyse forum - Quête 3
+    l "Quant à moi, je peux essayer de commencer à récolter des témoignages en ligne, je suis plutôt à l'aise avec les outils de communication sur Internet donc on peut voir ensemble ce que je trouve."
+
+    l "Après si je trouve des témoignages, je compte sur toi pour m'aider à trouver les plus fiables et les plus intéressants. Certains témoignages pourraient être biaisés, et on ne peut pas se permettre de publier des informations non vérifiées."
+
+    hide character_alexis_sourit 
+    hide technicienne 
+    hide c_lola
+    with fade
 
     # Objectifs
     "Votre objectif est de recueillir et croiser les informations fournies par chaque membre du club Journalisme."
+    "En tant que Journalistes en herbe, le proviseur compte sur vous pour écrire un article sérieux, donc analysez bien les informations que vous trouverez, car elles seront la base de votre artcile final !"
+    "Si les informations que vous collectez ne sont pas fiables, c'est l'article que vous allez rédiger qui manquera aussi de fiabilité, ça serait une catastrophe pour les élèves du collège."
 
-    "Vous devez :"
+    "Pour pouvoir écrire l'article, vous devrez :"
     "1. Vérifier la fiabilité des sources mentionnées par Alexis."
-    "2. Analyser la vidéo de Paul avec l'aide de la Technicienne pour détecter d'éventuelles manipulations."
-    "3. Interroger les témoins et vérifier leurs déclarations avec le Responsable d’interview."
+    "2. Analyser la vidéo de Paul avec l'aide d'Alice pour détecter d'éventuelles manipulations."
+    "3. Analyser et récupérer les bons témoignages que Lola aura pu récolter en ligne."
 
     jump choix_quete
 
@@ -337,23 +383,23 @@ label choix_quete:
             respo_interview "Tu dois encore interroger quelques témoins. Reviens après."
         jump retour_avant_quete
 
-    "Vous êtes de retour au Club Journalisme pour choisir votre prochaine quête."
+    "Alors maintenant, quelle piste décidez vous de suivre ?"
 
     if all(quests.values()):
         "Félicitations, toutes les enquêtes sont terminées !"
         return
 
     menu:
-        "Sélectionnez une piste d’enquête en fonction des membres du club :"
-        "Suivre Alexis (Rédacteur)" if not quests["alexis"]:
+        "Sélectionnez une des pistes d’enquête présentée par chaque membre du club :"
+        "Suivre Alexis - Le Rédacteur" if not quests["alexis"]:
             $ current_quest = "alexis"
             jump quete_1
 
-        "Suivre la Technicienne" if not quests["technicienne"]:
+        "Suivre Alice - La Reponsable Images et Vidéo" if not quests["technicienne"]:
             $ current_quest = "technicienne"
             jump quete_2
 
-        "Suivre le Responsable d’interview" if not quests["respo_interview"]:
+        "Suivre Lola - La Responsable informatique et communication" if not quests["respo_interview"]:
             $ current_quest = "respo_interview"
             jump quete_3
 
@@ -734,7 +780,6 @@ label conclusion_quete1:
     show c_alexis_sourit
     alexis "Bravo, tu as demandé les sources des informations que tu entendais quand c'était nécessaire et à présent tu sais à quels signes de fiabilité faire attention quand tu lis des articles de presse!"
     
-    return 
 
     "Quête d'Alexis terminée."
     $ quests["alexis"] = True
@@ -759,10 +804,10 @@ label quete_2:
 # Quête 3 - point d'entrée
 label quete_3:
   
-    scene club_journalisme
+    scene club_journalisme with fade
     $ quests["respo_interview"] = True
     $ current_quest = None
-    #show lola (manque image)
+    show c_lola with dissolve 
 
     l "Salut ! Du coup, pour écrire notre article j’ai mis un message sur le Forum de l’ENT du collège pour voir si des élèves et des profs avaient envie de témoigner et de nous donner des informations."
     l "Je ne m’attendais pas à ça, mais le forum déborde. J’ai fait un premier tri mais là {b}j’ai vraiment besoin de toi pour trier les derniers messages.{/b}"
@@ -773,13 +818,17 @@ label quete_3:
 
 # Scène 2 - Explication des biais
 label ordinateur_lola:
-    #scene ordinateur
-    #show lola sérieux (manque image)
+    scene ordi_forum with dissolve
+    show c_lola at left
+    with dissolve
 
     l "Pour t'aider, voici ce que j’ai noté en cours sur trois biais cognitifs courants dans la diffusion de fausses informations :"
-    l "{b}Corrélation illusoire :{/b} c'est quand on voit un lien entre deux événements qui n'existent pas réellement."
+    l "{b}Corrélation illusoire :{/b} c'est quand on voit un lien qui n'existe pas réélement, entre deux événements."
     l "{b}Autorité :{/b} croire qu'une information est vraie simplement parce qu'elle provient d'une figure réputée, sans vérifier les faits."
-    l "{b}Confirmation{b} (cherry picking) {b}:{/b} ce biais nous pousse à ne retenir que les infos qui confirment nos croyances et à ignorer celles qui pourraient les contredire."
+    l "{b}Confirmation (cherry picking):{/b} ce biais nous pousse à ne retenir que les infos qui confirment nos croyances et à ignorer celles qui pourraient les contredire."
+    l "J'ai ajouté une fiche récap sur biais cognitifs à ton inventaire si jamais tu as besoin de te rappeler de chaque définition pendant qu'on analysera les témoignages !"
+    $ add_to_inventory("fiche_biais")
+
     l "Donc là il faut vraiment que tu check chaque témoignage du forum. Pour chaque message, tu as deux options : Le Récupérer si tu sens qu’il est fiable ou l’Analyser si tu sens qu’il l’est pas. Et si en plus tu trouves quel biais entre en jeu, alors t’es un boss."
     l "Après si t’analyses un témoignage qui au final est fiable c’est pas grave hein, vaut mieux être trop prudent que pas assez, tu pourras toujours le récupérer. Mais si tu dis qu’il est biaisé alors que non, c’est dommage on le mettra de côté pour rien."
     l "Si t’as tout compris et que t’es Prêt(e), allons voir le forum !"
@@ -787,15 +836,19 @@ label ordinateur_lola:
     jump témoignage_1
 
 label témoignage_1:
-    #scene forum (manque image)
-    #show avatar_témoin_1 (manque visuel avatar)
-    #On peut peut-être mettre une pastille comme une photo d'avatar/de profil d'un forum pour illustrer ?
+    scene forum with fade
+    show temoi1 at Position(ypos=1200)
+    with dissolve
+   
 
     # Texte du témoignage
-    "« Depuis que mon petit frère joue aux jeux de tir, il semble de plus en plus agressif. Ça doit être dû aux jeux vidéo. »"
+    "Voici le premier témoignage, qu'en penses-tu ?"
 
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            scene forum with dissolve
+            show c_lola_p at left 
+            with dissolve
             l "Hmm... Ok, moi je trouve que le lien qu'il fait est bizarre..."  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             $ quete3_score -= 1  # Score = -1
@@ -803,6 +856,8 @@ label témoignage_1:
             jump témoignage_2  # Saute vers le témoignage suivant
 
         "Analyser ce témoignage":  # Option pour analyser le témoignage
+            scene forum with dissolve 
+            with dissolve
             jump analyse_biais_1  # Saute vers l'analyse du témoignage
 
     return
@@ -812,21 +867,29 @@ label analyse_biais_1:
     menu:  # Crée un menu avec des options pour le joueur
         "Quel biais cognitif identifiez-vous ?"  # Question posée au joueur
         "Autorité":  # Option pour choisir le biais d'autorité
+            scene forum with dissolve
+            show c_lola_p at left 
             l "Je crois que c'est plutôt un biais de corrélation illusoire. Mais déjà bravo d’avoir capté que le témoignage était biaisé."  # Feedback mauvais biais
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             $ quete3_score += 1
             jump témoignage_2
         "Confirmation":
+            scene forum with dissolve
+            show c_lola_p at left 
             l "Je crois que c'est plutôt un biais de corrélation illusoire. Mais déjà bravo d’avoir capté que le témoignage était biaisé."  # Feedback mauvais biais
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             $ quete3_score += 1
             jump témoignage_2
         "Corrélation illusoire":  # Option pour choisir le biais de corrélation illusoire
+            scene forum with dissolve
+            show c_lola at left
             l "Trop fort ! T'as identifié le biais de corrélation illusoire. Le témoignage n'était pas fiable."  # Lola félicite le joueur
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             $ quete3_score += 1  # Augmente le score du joueur de 1
             jump témoignage_2  # Saute vers le témoignage suivant
         "fiable":
+            scene forum with dissolve
+            show c_lola_p at left 
             l "Hmm... Ok, moi je trouve que le lien qu'il fait est bizarre..."  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
     $ quete3_score -= 1  # Score = -1
@@ -834,15 +897,17 @@ label analyse_biais_1:
     jump témoignage_2  # Saute vers le témoignage suivant
 
 label témoignage_2:
-    #scene forum (manque image)
-    #show avatar_témoin_2 (manque visuel avatar)
-    #On peut peut-être mettre une pastille comme une photo d'avatar/de profil d'un forum pour illustrer ?
+    scene forum with fade
+    show temoi2 at Position(ypos=1200)
+    with dissolve
 
     # Texte du témoignage
-    "« Un célèbre youtubeur a affirmé que les jeux vidéo rendent violent. Il ne se trompe jamais, donc ça doit être vrai. »"
+    "Voici le second témoignage, qu'en penses-tu ?"
 
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            scene forum with dissolve
+            show c_lola_p at left
             l "Hmm… Ok, moi je trouve qu’il fait confiance un peu vite à ce Youtubeur, en plus il dit même pas qui c’est … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             $ quete3_score -= 1  # Score = -1
@@ -850,6 +915,7 @@ label témoignage_2:
             jump témoignage_3  # Saute vers le témoignage suivant
 
         "Analyser ce témoignage":  # Option pour analyser le témoignage
+            scene forum with dissolve 
             jump analyse_biais_2  # Saute vers l'analyse du témoignage
 
     return
@@ -859,21 +925,29 @@ label analyse_biais_2:
     menu:  # Crée un menu avec des options pour le joueur
         "Quel biais cognitif identifiez-vous ?"  # Question posée au joueur
         "Autorité":  # Option pour choisir le biais d'autorité
+            scene forum with dissolve
+            show c_lola at left 
             l "T’es le boss ! T’as identifié le biais d’autorité. Le témoignage n'était pas fiable."  # Feedback mauvais biais
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             $ quete3_score += 1
             jump témoignage_3
         "Confirmation":
+            scene forum with dissolve
+            show c_lola_p at left
             l "Je crois que c’est plutôt un biais d’autorité. Mais déjà bravo d’avoir capté que le témoignage était biaisé."  # Feedback mauvais biais
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             $ quete3_score += 1
             jump témoignage_3
         "Corrélation illusoire":  # Option pour choisir le biais de corrélation illusoire
+            scene forum with dissolve
+            show c_lola_p at left
             l "Je crois que c’est plutôt un biais d’autorité. Mais déjà bravo d’avoir capté que le témoignage était biaisé."  # Lola félicite le joueur
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             $ quete3_score += 1  # Augmente le score du joueur de 1
             jump témoignage_3  # Saute vers le témoignage suivant
         "fiable":
+            scene forum with dissolve
+            show c_lola_p at left
             l "Hmm… Ok, moi je trouve qu’il fait confiance un peu vite à ce Youtubeur, en plus il dit même pas qui c’est … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
     $ quete3_score -= 1  # Score = -1
@@ -881,15 +955,17 @@ label analyse_biais_2:
     jump témoignage_3  # Saute vers le témoignage suivant
 
 label témoignage_3:
-    #scene forum (manque image)
-    #show avatar_témoin_2 (manque visuel avatar)
-    #On peut peut-être mettre une pastille comme une photo d'avatar/de profil d'un forum pour illustrer ?
+    scene forum with fade
+    show temoi3 at Position(ypos=1200)
+    with dissolve
 
     # Texte du témoignage
-    "« Une récente enquête menée par un collectif de journalistes indépendants montre que la violence dans les collèges reste stable malgré la popularité des jeux vidéo. J’ai même le lien de l’enquête si vous voulez. »"
+    "Voici le troisième témoignage, qu'en penses-tu ?"
 
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            scene forum with dissolve
+            show c_lola at left  
             l "Parfait ! Ce témoignage est fiable et précieux pour notre article. En plus il a même mis le lien vers l'enquête, c'est top !" # Feedback bonne réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             $ quete3_score += 1
@@ -897,6 +973,7 @@ label témoignage_3:
             jump témoignage_4
 
         "Analyser ce témoignage":  # Option pour analyser le témoignage
+            scene forum with dissolve
             jump analyse_biais_3  # Saute vers l'analyse du témoignage
 
     return
@@ -906,20 +983,28 @@ label analyse_biais_3:
     menu:  # Crée un menu avec des options pour le joueur
         "Quel biais cognitif identifiez-vous ?"  # Question posée au joueur
         "Autorité":  # Option pour choisir le biais d'autorité
+            scene forum with dissolve
+            show c_lola_p at left
             l "T’es sûr ? Pourtant il parle de journaliste indépendant, met sa source et tout, j’ai vraiment cru que c’était fiable. Mais bon c’est toi le spécialiste hein !"  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             $ quete3_score -= 1  # Score = -1
             jump témoignage_4
         "Confirmation":
+            scene forum with dissolve
+            show c_lola_p at left
             l "T’es sûr ? Pourtant il parle de journaliste indépendant, met sa source et tout, j’ai vraiment cru que c’était fiable. Mais bon c’est toi le spécialiste hein !"  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             $ quete3_score -= 1  # Score = -1
             jump témoignage_4
         "Corrélation illusoire":  # Option pour choisir le biais de corrélation illusoire
+            scene forum with dissolve
+            show c_lola_p at left
             l "T’es sûr ? Pourtant il parle de journaliste indépendant, met sa source et tout, j’ai vraiment cru que c’était fiable. Mais bon c’est toi le spécialiste hein !"  # Feedback mauvaise réponse
             $ quete3_score -= 1  # Score = -1  # Augmente le score du joueur de 1
             jump témoignage_4  # Saute vers le témoignage suivant
         "fiable":
+            scene forum with dissolve
+            show c_lola at left  
             l "Parfait ! Ce témoignage est fiable et précieux pour notre article. En plus il a même mis le lien vers l'enquête, c'est top !" # Feedback bonne réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             $ quete3_score += 1
@@ -927,14 +1012,16 @@ label analyse_biais_3:
     jump témoignage_4  # Saute vers le témoignage suivant
 
 label témoignage_4:
-    #scene forum (manque image)
-    #show avatar_témoin_2 (manque visuel avatar)
-    #On peut peut-être mettre une pastille comme une photo d'avatar/de profil d'un forum pour illustrer ?
+    scene forum with fade
+    show temoi4 at Position(ypos=1200)
+    with dissolve
 
     # Texte du témoignage
-    "« J’ai lu plein d’articles expliquant que les jeux vidéo augmentent l’agressivité, ils en parlent tout le temps sur TikTok et tous mes amis pensent la même chose. Ça ne peut pas être une coïncidence.»"
+    "Voici le quatrième témoignage, qu'en penses-tu ?"
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            scene forum with dissolve
+            show c_lola_p at left
             l "Ah ouais … Ok. Moi je trouve pas que ce qu’il dit soit basé sur des infos vraiment fondées son témoignage, puis bon il cite même pas les articles, et alors TikTok moi j’suis pas sûre de valider … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
             l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
             $ quete3_score -= 1  # Score = -1
@@ -942,6 +1029,7 @@ label témoignage_4:
             jump conclusion_quete3  # Saute vers le témoignage suivant
 
         "Analyser ce témoignage":  # Option pour analyser le témoignage
+            scene forum with dissolve
             jump analyse_biais_4  # Saute vers l'analyse du témoignage
 
     return
@@ -951,21 +1039,29 @@ label analyse_biais_4:
     menu:  # Crée un menu avec des options pour le joueur
         "Quel biais cognitif identifiez-vous ?"  # Question posée au joueur
         "Autorité":  # Option pour choisir le biais d'autorité
+            scene forum with dissolve
+            show c_lola_p at left
             l "Je crois que c’est plutôt un biais de confirmation. Mais déjà bravo d’avoir capté que le témoignage était biaisé."  # Feedback mauvais biais
             l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
             $ quete3_score += 1
             jump conclusion_quete3
         "Confirmation":
+            scene forum with dissolve
+            show c_lola at left 
             l "T’es le boss ! T’as identifié le biais de confirmation. Le témoignage n'était pas fiable." # Feedback bonne réponse
             l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
             $ quete3_score += 1
             jump conclusion_quete3
         "Corrélation illusoire":  # Option pour choisir le biais de corrélation illusoire
+            scene forum with dissolve
+            show c_lola_p at left
             l "Je crois que c’est plutôt un biais de confirmation. Mais déjà bravo d’avoir capté que le témoignage était biaisé."  # Feedback mauvais biais
             l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
             $ quete3_score += 1  # Augmente le score du joueur de 1
             jump conclusion_quete3  # Saute vers le témoignage suivant
         "fiable":
+            scene forum with dissolve
+            show c_lola_p at left
             l "Ah ouais … Ok. Moi je trouve pas que ce qu’il dit soit basé sur des infos vraiment fondées son témoignage, puis bon il cite même pas les articles, et alors TikTok moi j’suis pas sûre de valider … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
             l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
     $ quete3_score -= 1  # Score = -1
@@ -973,19 +1069,26 @@ label analyse_biais_4:
     jump conclusion_quete3  # Saute vers le témoignage suivant
 
 label conclusion_quete3:
-    scene club_journalisme
+    scene ordi_forum with dissolve
+    
 
     $ score = quete3_score  # Enregistre le score de la quête 3
     $ quetes_complete += 1  # Incrémente le nombre de quêtes complétées
 
     if quete3_score >= 3:
+        show c_lola at center
+        with dissolve
         l "Bravo, grâce à toi on a des témoignages vraiment fiables pour l’article..."
     elif quete3_score >= 2:
+        show c_lola at center
+        with dissolve
         l "Je pense que tu as peut-être fait quelques erreurs, mais l'important est que tu as su repérer des messages douteux..."
     else:
+        show c_lola_p at center
+        with dissolve
         l "Avec un peu de recul, je ne suis pas trop sûre de tes choix..."
 
-    return
+
     $ quests["respo_interview"] = True
     $ current_quest = None
     jump choix_quete

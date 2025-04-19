@@ -1,12 +1,12 @@
-renpy.ftl
-renpy.dissolve renpy.geometry
->>>>>>> e6f3d4d (Initial commit)
-renpy.texture
 <<<<<<< HEAD
-=======
-renpy.dissolve renpy.dissolve
-renpy.geometry renpy.texture
-renpy.solid
-renpy.alpha renpy.texture
+renpy.dissolve renpy.geometry
+renpy.ftl
 renpy.geometry renpy.solid
+renpy.geometry renpy.texture
+renpy.dissolve renpy.dissolve
+>>>>>>> e6f3d4d (Initial commit)
+renpy.alpha renpy.texture
+renpy.solid
+renpy.texture
+=======
 renpy.alpha renpy.geometry renpy.texture

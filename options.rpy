@@ -51,8 +51,7 @@ define build.name = "testUE"
 
 define config.has_sound = True
 define config.has_music = True
-define config.has_voice = True
-
+define config.has_voice = False
 
 ## Pour autoriser le joueur à réaliser un test de volume, décommenter la ligne
 ## ci-dessous et utilisez-la pour configurer un son d’exemple.

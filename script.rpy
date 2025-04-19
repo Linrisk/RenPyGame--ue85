@@ -529,7 +529,7 @@ label club_journalisme:
     # Vérification des articles dans l'inventaire
     if "article_lucas" in inventory and "article_ethan" in inventory:
         alexis "Super ! Je vois que tu as collecté les deux articles dont nous avions besoin."
-        jump scene_analyse_fiabilité
+        jump scene_lecture_articles
 
     elif "article_lucas" not in inventory:
         show c_alexis_sourit_pas
@@ -595,18 +595,105 @@ label retour_au_club:
     jump club_journalisme
 
 
-#Dernière étape : analyse des articles
-#Partie 1 = analyse de l'article d'Ethan (je vais améliorer le côté visu après d'abord je vérifie que tt fonctionne bien après intégration de la quête)
-label scene_analyse_fiabilité:
+#Le joueur lit les 2 articles qu'il a récupérés 
+label scene_lecture_articles:
+
+    scene b_zoom_ordi_club
+    with fade
+
+    show c_alexis_sourit
+    alexis "Parfait. Lis-les attentivement, puis dis-moi lequel te semble le plus fiable."
+
+    label lecture_articles_menu: #choix des articles à lire, menu de retour au choix quand le joueur a fini de lire l'un d'entre eux.
+
+        menu:
+            "Choisis un article à lire :"
+            "Lire l'article de Lucas":
+                jump lire_article_lucas
+            "Lire l'article d'Ethan":
+                jump lire_article_ethan
+            "J'ai lu les deux articles":
+                jump choix_article_fiable
+
+    return
+
+#lecture de l'article de lucas
+
+label lire_article_lucas:
+
+    scene b_zoom_ordi_club
+    show article_lucas_general at truecenter
+    with dissolve
+
+    "Voici l'article de Lucas affiché en grand. Clique quand tu as fini de le lire."
+    window hide #cache le ruban de dialogue (il cachait une partie de l'article)
+
+
+    pause #permet de mettre le script sur pause jusqu'à que le joueur clique (ici ça lui laisse le temps de lire)
+
+    hide article_lucas_general
+    with fade
+    window show
+
+    jump lecture_articles_menu
+
+label lire_article_ethan:
+
+    scene b_zoom_ordi_club
+    show article_ecran_general1 at truecenter
+    with dissolve
+
+    "Voici la première page de l'article d'Ethan affichée en grand. Il vient du site www.alnas.fr et a été écrit par Antar Belkhefa. Clique pour voir la suite."
+    window hide
+
+    pause
+
+    hide article_ecran_general1
+    with fade
+
+    show article_ecran_general2 at truecenter
+    with dissolve
+
+    "Voici la deuxième page de l'article d'Ethan."
+
+    pause
+
+    hide article_ecran_general2
+    with fade
+
+    window show
+    jump lecture_articles_menu
+
+#le joueur choisit l'article qui lui paraît le plus pertinent
+label choix_article_fiable:
+
+    menu:
+        "Quel article est le plus fiable selon toi ?"
+        "Celui de Lucas":
+            $ choix_article = "lucas" #permet de se souvenir qu'il a choisit l'article de lucas et de le mener au feedback approprié
+        "Celui d'Ethan":
+            $ choix_article = "ethan" #idem mais pour l'article d'ethan
+
+    if choix_article == "lucas":  #variable qui guide le joueur en fonction de l'article choisi
+        jump feedback_lucas
+    else:
+        jump feedback_ethan
+
+
+
+#Dernière étape : feedback d'Alexis
+#Partie 1 = analyse de l'article d'Ethan 
+label feedback_ethan:
 
     scene b_zoom_ordi_club
 
-    alexis "Alors, voilà l'article d'Ethan. Regarde bien le titre :"
+    alexis "Alors, regardons article d'Ethan. Regarde bien le titre :"
 
-    #montre les deux articles à la fois
+    #montre les deux pages à la fois positionnées côte à côte
 
-    show article_ecran_general1 at left
-    show article_ecran_general2 at right
+    show article_ecran_general1 at Position(xalign=0.25, yalign=0.5)
+    show article_ecran_general2 at Position(xalign=0.75, yalign=0.5)
+
 
     with fade
 
@@ -654,11 +741,11 @@ label scene_analyse_fiabilité:
     alexis "Les spécialistes recommandent de ne pas les interdire, mais de les utiliser intelligemment, avec l’aide des parents."
     alexis "Bref, avant de croire un article comme celui-là, pose-toi toujours des questions. C’est comme ça qu’on devient un lecteur malin !"
 
-    jump scene_analyse_article_fiable #transporte le joueur à la lecture du prochain article
+    jump feedback_lucas #transporte le joueur à la lecture du prochain article
 
 #Partie 2 = analyse de l'article de Lucas (à améliorer graphiquement aussi)
 
-label scene_analyse_article_fiable:
+label feedback_lucas:
 
     scene b_zoom_ordi_club
  

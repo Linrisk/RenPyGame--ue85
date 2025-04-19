@@ -49,6 +49,22 @@ image temoi2 = "images/items/T2.png"
 image temoi3 = "images/items/T3.png"
 image temoi4 = "images/items/T4.png"
 
+#Images quête_2 
+
+image bg_video_analysis = "images/backgrounds/b_zoom_ordi_technicien.png"
+image oeil = "images/icons/eye.png"
+image account = "images/icons/account.png"
+image zoom_visage = "images/zoom_visage.png"
+image zoom_main = "images/zoom_main.png"
+image fake_account_profile = "images/fake_account_profile.png"
+image fake_account_videos = "images/fake_account_videos.png"
+image legit_account = "images/legit_account.png"
+image fake_account_video_1 = Movie(play="videos/video_fake_account_1.webm", size=(640,360), loop=False)
+image fake_account_video_2 = Movie(play="videos/video_fake_account_2.webm", size=(640,360), loop=False)
+
+
+
+
 # Initialisation des variables de score par quête
 default quete1_score = 0
 default quete2_score = 0
@@ -93,14 +109,9 @@ init:
 
     # Définition des objets récupérables
     default items = {
-        "carnet": {"name": "Carnet de notes", "image": "images/item_carnet.png", "description": "Notes du professeur avec des marques de connexion."},
-        "cle_usb": {"name": "Clé USB", "image": "images/item_cle_usb.png", "description": "Contient des fichiers suspects datés du jour de l'incident."},
-        "emploi_temps": {"name": "Emploi du temps", "image": "images/item_emploi.png", "description": "L'emploi du temps de l'élève accusé. Il était en sport lors de l'envoi."},
-        "journal_cdi": {"name": "Registre du CDI", "image": "images/item_registre.png", "description": "Liste des élèves présents au CDI ce jour-là."},
-        "capture_ecran": {"name": "Capture d'écran", "image": "images/item_capture.png", "description": "Preuve de connexion à l'ENT à une heure suspecte."},
-        "article_lucas": {"name": "Article de Lucas", "image": "images/item_article_lucas.png", "description": "Tu vas l'analyser plus tard avec Alexis."},
-        "article_ethan": {"name": "Article d'Ethan", "image": "images/item_article_ethan.png", "description": "Tu vas l'analyser plus tard avec Alexis."},
-        "fiche_biais": {"name": "Fiche biais cognitifs", "image": "images/items/fiche_biais.png", "description": "Petit récap des définitions."}
+        "article_ethan": {"name": "article Ethan", "image": "gui/icons/files.png", "description": "Article d'Ethan sur les jeux vidéo."},
+        "article_lucas": {"name": "article Lucas", "image": "gui/icons/files.png", "description": "Article de Lucas sur les jeux vidéo."},
+        
     }
 
 init python:
@@ -109,9 +120,9 @@ init python:
         "technicienne": False,
         "respo_interview": False
     }
+    ##Je mets l'affichage inventaire en haut à gauche - fin le boutton
+    config.overlay_screens.append("hud")
 
-    def afficher_coord(x, y):
-        renpy.notify(f"Position : ({x}, {y})")
 
     def add_to_inventory(item_id):
         if item_id in items and len(inventory) < max_items and item_id not in inventory:
@@ -172,10 +183,11 @@ screen item_description(item_id):
 # Écran de tutoriel pour l'inventaire
 screen tutoriel_inventaire():
     modal True
+    add "gui/g_inventory.png" xalign 0.5 yalign 0.2
     frame:
-        background "gui/frame.png"
+        background None
         xalign 0.5
-        yalign 0.5
+        yalign 0.8
         xsize 800
         ysize 600
 
@@ -187,7 +199,6 @@ screen tutoriel_inventaire():
 
             text "Fonctionnalités:" size 30 xalign 0.5
             text "• Voir les objets récoltés" xalign 0.5
-            text "• Utiliser les objets pour progresser" xalign 0.5
             text "• Gérer les objets importants" xalign 0.5
 
         textbutton "J'ai compris" action [Hide("tutoriel_inventaire"), Return()] xalign 0.5 yalign 0.95
@@ -195,9 +206,10 @@ screen tutoriel_inventaire():
 # Inventaire
 screen inventory_screen():
     modal True
+    add "gui/g_inventory.png" xalign 0.5 yalign 0.5
 
     frame:
-        background "gui/frame.png"
+        background None
         xalign 0.5
         yalign 0.5
         xsize 800
@@ -213,15 +225,7 @@ screen inventory_screen():
                 spacing 10
                 xalign 0.5
                 for item_id in inventory:
-                    frame:
-                        xsize 150
-                        ysize 150
-                        imagebutton:
-                            idle items[item_id]["image"]
-                            action Show("item_description", item_id=item_id)
-                            xalign 0.5
-                            yalign 0.5
-                # Remplir avec des slots vides
+                    use inventory_slot(item_id)
                 for i in range(max_items - len(inventory)):
                     frame:
                         xsize 150
@@ -230,12 +234,40 @@ screen inventory_screen():
 
         textbutton "Fermer" action Hide("inventory_screen") xalign 0.5 yalign 0.95
 
+
+##Screen pour les objets et pour l'affichage les objets dans l'inventaire et les objets dans les étiquettes  
+
+screen inventory_slot(item_id):
+    default show_tooltip = False
+
+    frame:
+        xsize 150
+        ysize 150
+        imagebutton:
+            idle items[item_id]["image"]
+            action Show("item_description", item_id=item_id)
+            hovered SetScreenVariable("show_tooltip", True)
+            unhovered SetScreenVariable("show_tooltip", False)
+            xalign 0.5
+            yalign 0.5
+
+        if show_tooltip:
+            frame:
+                background "#333c"
+                xsize 140
+                ysize 40
+                xpos 10
+                ypos 110
+                text items[item_id]["name"] size 18 xalign 0.5
+                text items[item_id]["description"] size 14 xalign 0.5
+
+screen hud():
+    textbutton "Inventaire" action ToggleScreen("inventory_screen") xpos 20 ypos 20
+
+
+
 # Destinations
 label start:
-    # Configuration des touches et écrans
-    $ config.keymap['inventory'] = ['e', 'E']
-    $ config.underlay.append(renpy.Keymap(inventory=lambda: renpy.show_screen('inventory_screen')))
-    show screen debug_mouse_position
     play music "intro_jeu.ogg"volume 0.3
     scene bureau_proviseur
     with fade
@@ -261,14 +293,11 @@ label start:
     hide c_proviseur
 
     scene black
-    
-    play movie "videos/v_deepfake.mp4"
-    show movie
 
-    "..."
+    show screen video_popup("videos/v_deepfake.webm")
+    $ renpy.pause(0.1, hard=True)  # pour laisser le temps à la vidéo de démarrer
 
-    stop movie
-    hide movie
+      
 
     "La vidéo est terminée."
 
@@ -295,8 +324,6 @@ label start:
     c_proviseur "Pour mener cette mission à bien, vous aurez accès à un inventaire."
    
     
-    show inventory at right
-    with moveinright
 
     c_proviseur "Il vous permettra de voir les objets récoltés, et de les utiliser pour progresser dans votre enquête."
 
@@ -419,10 +446,6 @@ label choix_quete:
             jump quete_3
 
 
-label retour_avant_quete:
-    "Vous repartez poursuivre votre enquête."
-    return
-
 #Quête 1 - Témoignages
 #Etape 1 discussion avec le rédacteur, Alexis, début de la quête
 
@@ -496,7 +519,7 @@ label scene_couloirs:
     menu:    #permet au joeur de choisir entre deux options
         "Si des scientifiques le disent, alors ça doit être vrai.":
             "Tu acceptes l'information sans poser de question."
-            $ quete2_score -= 1  # mauvais choix, ne gagne pas de points
+            $ quete1_score -= 1  # mauvais choix, ne gagne pas de points
 
         "Est-ce que tu as une source pour ce que tu dis ?":
             lucas "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
@@ -547,12 +570,12 @@ label scene_hall:
     menu: #ouvre des choix après le dialogue
         "Si des scientifiques le disent, alors ça doit être vrai.":
             "Tu acceptes l'information sans poser de question."
-            $ quete2_score -= 1  # Mauvais choix
+            $ quete1_score -= 1  # Mauvais choix
 
         "Est-ce que tu as une source pour ce que tu dis ?":
             show c_ethan
             ethan "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
-            $ quete2_score += 1  # Bon choix
+            $ quete1_score += 1  # Bon choix
             $ add_to_inventory("article_ethan")# Ajoute l'article d'Ethan à l'inventaire
             "Tu as obtenu l'article d'Ethan. Tu pourras aller en vérifier la fiabilité !"
 
@@ -619,7 +642,7 @@ label scene_couloirs_retour:
     menu:
         "Oui, je veux bien le lien vers ton article.":
             lucas "Pas de souci. Voilà !"
-            $ inventory["Article Lucas"] = 1 #obtiens l'article de Lucas
+            $ add_to_inventory("article_lucas") #obtiens l'article de Lucas
             $ a_parle_a_lucas = True #confirme à nouveau que le joueur a parlé à Lucas, il peut à nouveau être renvoyé vers le club et montrer sa source à Alexis
             "Tu as obtenu l'article de Lucas. Tu pourras aller en vérifier la fiabilité !"
             jump retour_au_club
@@ -642,7 +665,7 @@ label scene_hall_retour:
     menu:
         "Tu peux me donner le lien de ton article ?":
             ethan "Bien sûr. Tiens, le voilà."
-            $ inventory["Article Ethan"] = 1 #ajoute l'article d'Ethan à l'inventaire
+            $ add_to_inventory("article_ethan") #ajoute l'article d'Ethan à l'inventaire
             $ a_parle_a_ethan = True #reconfirme que le joueur a parlé à Ethan
             "Tu as obtenu l'article d'Ethan. Tu pourras aller en vérifier la fiabilité !"
             jump retour_au_club
@@ -889,22 +912,208 @@ label conclusion_quete1:
     $ current_quest = None
     jump choix_quete
 
+
+
+
+## OCE LOG - QUETE OCE A INTEGRER
+
 #Quête 2 - Analyse vidéo
 label quete_2:
     scene b_salle_info
     with fade
     play music "quete_2.wav" loop fadeout 0.5 fadein 1.0
 
-    technicienne "D'accord, allons analyser la vidéo de Paul."
+    show c_alice_sourit at left
+    alice "On va analyser la vidéo de Paul ensemble."
+    alice "Pour rappel, un deepfake, c'est une vidéo créée ou modifiée grâce à l'intelligence artificielle pour faire croire à quelque chose de faux. Il faut donc être très attentif aux détails !"
+    alice "Regarde, voici la vidéo qui a circulé partout :"
 
-    # Ajoute ici les étapes de la quête...
+    $ renpy.movie_cutscene("videos/v_deepfake.webm")
 
-    "Quête de la Technicienne terminée."
-    $ quests["technicienne"] = True
-    $ current_quest = None
-    jump choix_quete
+    "Tu observes attentivement la vidéo."
+
+    alice "Tu vas pouvoir utiliser plusieurs outils pour vérifier si la vidéo est authentique ou truquée."
+
+    
+    $ indices_video = []
+    $ outils_utilises = []
+
+    call quete2_analysis
+
+# Ecran accueil choix menu outils
+label quete2_analysis:
+    scene b_zoom_ordi_technicien  # Image de fond de l'ordinateur
+    with fade
+
+    menu:
+        "Choisis un outil d'analyse :"
+        
+        "Examiner les détails visuels" if "visuel" not in outils_utilises:
+            jump quete2_visuel
+            
+        "Vérifier le compte source" if "compte" not in outils_utilises:
+            jump quete2_compte
+            
+        "Interroger un témoin" if "temoin" not in outils_utilises:
+            jump quete2_temoin
+            
+        "Passer à la synthèse" if len(outils_utilises) >= 2:
+            jump quete2_synthese
 
 
+# Analyse image pure
+label quete2_visuel:
+    show c_alice_sourit at left
+    alice "On commence par l'image. Je zoome sur le visage de Paul."
+    show expression "zoom_video" at truecenter with dissolve
+
+    alice "Tu remarques quelque chose de bizarre ?"
+    menu:
+        "Les ombres ne collent pas et il ne cligne jamais des yeux.":
+            alice "Bien vu ! Les deepfakes oublient souvent ces détails."
+            $ indices_video.append("Ombres incohérentes et absence de clignement")
+            $ quete2_score += 1
+            $ outils_utilises.append("visuel")
+            hide expression "zoom_video" with dissolve
+            call quete2_analysis
+            
+        "Non, tout a l'air normal.":
+            alice "Regarde mieux, fais attention aux mains..."
+            
+            alice "Les mains bougent de façon étrange, ce qui est peut-être un autre indice de manipulation."
+            menu:
+                "Oui, les mains sont bizarres aussi.":
+                    alice "Exact ! Les deepfakes ont souvent du mal à générer des mains réalistes."
+                    $ indices_video.append("Mains étranges (signalé par Alice)")
+                    $ outils_utilises.append("visuel")
+                    $ quete2_score += 1
+                    hide expression "zoom_main" with dissolve
+                    call quete2_analysis
+
+                "Non, je trouve les mains normales.":
+                    alice "Pourtant, regarde bien : certains doigts sont déformés ou il y a des mouvements impossibles. Les IA ont souvent du mal avec les mains et cree des mains à 6 doigts, c'est un signe de manipulation."
+                    $ indices_video.append("Mains suspectes (signalé par Alice)")
+                    $ outils_utilises.append("visuel")
+                    hide expression "zoom_main" with dissolve
+                    call quete2_analysis
+
+
+
+# Analyse du superbe beau compte du turfu qui a fait la vidéo 
+label quete2_compte:
+    show c_alice_sourit at left
+    alice "Examinons le compte qui a posté la vidéo."
+    
+    show fake_account_profile at truecenter with dissolve
+    alice "Regarde son profil : le nom, le compte n'est abonné à personne, la photo est issu d'un film, la bio est très étrange et incite à donner de l'argent sur un lien ... Déjà très suspect."
+    hide fake_account_profile with dissolve
+
+    show fake_account_videos at truecenter with dissolve
+    alice "Ses autres vidéos sont tout aussi étranges :"
+    hide fake_account_videos with dissolve
+
+    menu:
+        "Examiner la vidéo 'Anniversaire avec les dinosaures'":
+            show fake_account_video_1 at truecenter
+            "Tu lances la vidéo 'Anniversaire avec les dinosaures'."
+            pause 3
+            hide fake_account_video_1
+            alice "Cette vidéo montre un anniversaire avec des dinosaures, mais en y regardant de plus près, on remarque que le montage est grossier et que les dinosaures n'existent plus... Le titre est typique de l'envie d'attirer l'attention."
+            $ indices_video.append("Vidéo 'Anniversaire avec les dinosaures' : montage douteux et contenu trompeur.")
+
+        "Regarder 'Otarie qui jongle OMG'":
+            show fake_account_video_2 at truecenter
+            "Tu lances la vidéo 'Otarie qui jongle OMG'."
+            pause 3
+            hide fake_account_video_2
+            alice "Cette vidéo montre une otarie qui jongle, mais en y regardant de plus près, on remarque que le montage est grossier (depuis quand les otaries ont de reels bras?). Le titre est typique de l'envie d'attirer l'attention."
+            $ indices_video.append("Vidéo 'Otarie qui jongle' : titre exagéré, contenu sans intérêt.")
+
+
+    
+    show legit_account at truecenter with dissolve
+    alice "À l'inverse, un compte sérieux a : historique, bio détaillée, publications régulières et variées."
+    hide legit_account with dissolve
+
+    menu:
+        "Ces incohérences prouvent que le compte est fake":
+            alice "Exact ! Aucun compte sérieux n'aurait ce genre de contenu incohérent."
+            $ quete2_score += 1
+        
+        "Peut-être qu'il débute juste...":
+            alice "Même un nouveau compte aurait un minimum de cohérence. Là l'objectif est simplement d'avoir le plus d'abonnés."
+           
+
+    $ outils_utilises.append("compte")
+    jump quete2_continue
+
+
+
+# Témoin externe ?
+label quete2_temoin:
+    show c_alice_sourit at left
+    alice "On peut aussi interroger un témoin. J'ai retrouvé un élève qui était présent ce jour-là."
+    show el at right
+    el "Je l’ai vu passer près des casiers, mais il n’avait pas de pioche et n’a rien cassé."
+    
+    menu:
+        "Merci pour ton témoignage !":
+            alice "Ce témoignage va à l'encontre de la vidéo, c'est un indice important."
+            $ indices_video.append("Témoin : Paul n’a rien cassé ce jour-là")
+            $ quete2_score += 1
+            
+        "Ce témoignage n'est pas convaincant":
+            alice "Vraiment ? Pourtant il contredit directement la vidéo..."
+            $ indices_video.append("Témoignage douteux (signalé par Alice)")
+
+    $ outils_utilises.append("temoin")
+    call quete2_analysis
+
+
+label quete2_continue:
+    if len(outils_utilises) < 3:  # Si moins de 2 outils utilisés
+        call quete2_analysis  # Retour à l'écran dde base
+    else:
+        jump quete2_synthese  # Passe à la conclusion
+
+# Bilan de la quête tmtc
+label quete2_synthese:
+    scene b_salle_info with fade
+    show c_alice_sourit at left
+    
+    # Calcul du score sur 4
+    
+    alice "Tu as terminé l’analyse. Voici les indices que tu as collectés :"
+    "[', '.join(indices_video)]"
+    
+    
+    alice "Avec tous ces éléments, quelle est ta conclusion ?"
+    
+    menu:
+        "La vidéo est authentique":
+           
+            alice "Tu ignores tous les indices que nous avons pourtant trouvés ensemble..."
+            $ quests["technicienne"] = True
+            $ current_quest = None
+            jump choix_quete
+
+        "La vidéo est un deepfake":
+            $ quete2_score += 1
+            alice "Bravo ! Ta conclusion s'appuie sur une analyse solide."
+            $ quests["technicienne"] = True
+            $ current_quest = None
+            jump choix_quete
+
+        "Manque de preuves":
+            alice "La prudence est une qualité, mais il faut parfois trancher."
+            $ quests["technicienne"] = True
+            $ current_quest = None
+            jump choix_quete
+
+
+
+
+## OCE LOG - A PARTIR DE LA TOUT EST BON 
 # Quête 3 - point d'entrée
 label quete_3:
     play music "quete_3.wav" loop fadeout 0.5 fadein 1.0

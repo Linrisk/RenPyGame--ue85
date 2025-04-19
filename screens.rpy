@@ -1624,3 +1624,19 @@ style slider_vbox:
 style slider_slider:
     variant "small"
     xsize 900
+
+
+screen video_popup(movie_file):
+    modal True
+    frame:
+        xalign 0.5
+        yalign 0.5
+        xsize 800  # Largeur de la vidéo (adapte à ta vidéo)
+        ysize 450  # Hauteur de la vidéo (adapte à ta vidéo)
+        background "#000a"
+        vbox:
+            spacing 10
+            xalign 0.5
+            yalign 0.5
+            add Movie(play=movie_file, size=(800, 450))
+            textbutton "Fermer" action Hide("video_popup") xalign 0.5

@@ -467,12 +467,19 @@ label quete_1:
 
 label choix_destination:
     "C'est parti, est-ce que je commence par le hall ou les couloirs ?"
+
     menu:
-        "Aller aux couloirs":
-            jump scene_couloirs #emmène le joueur pour parler à Lucas
-            
-        "Aller au hall":
-            jump scene_hall #emmène le joueur pour parler à Ethan
+        "Aller aux couloirs" if not a_parle_a_lucas:
+            jump scene_couloirs  # emmène le joueur pour parler à Lucas
+
+        "Aller au hall" if not a_parle_a_ethan:
+            jump scene_hall  # emmène le joueur pour parler à Ethan
+
+    # Si le joueur a parlé aux deux personnages, passer à la réflexion
+    if a_parle_a_lucas and a_parle_a_ethan:
+        jump reflexion_apres_discussions
+    else:
+        jump choix_destination  # Représente le menu si un personnage n'a pas encore été rencontré
 
 #Etape 2, récupération de témoignages oraux
 

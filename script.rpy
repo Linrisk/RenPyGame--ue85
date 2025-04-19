@@ -503,7 +503,7 @@ label scene_couloirs:
     menu:    #permet au joeur de choisir entre deux options
         "Si des scientifiques le disent, alors ça doit être vrai.":
             "Tu acceptes l'information sans poser de question."
-            $ quete2_score -= 1  # mauvais choix, ne gagne pas de points
+            $ quete1_score -= 1  # mauvais choix, ne gagne pas de points
 
         "Est-ce que tu as une source pour ce que tu dis ?":
             lucas "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
@@ -554,12 +554,12 @@ label scene_hall:
     menu: #ouvre des choix après le dialogue
         "Si des scientifiques le disent, alors ça doit être vrai.":
             "Tu acceptes l'information sans poser de question."
-            $ quete2_score -= 1  # Mauvais choix
+            $ quete1_score -= 1  # Mauvais choix
 
         "Est-ce que tu as une source pour ce que tu dis ?":
             show c_ethan
             ethan "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
-            $ quete2_score += 1  # Bon choix
+            $ quete1_score += 1  # Bon choix
             $ add_to_inventory("article_ethan")# Ajoute l'article d'Ethan à l'inventaire
             "Tu as obtenu l'article d'Ethan. Tu pourras aller en vérifier la fiabilité !"
 
@@ -649,7 +649,7 @@ label scene_hall_retour:
     menu:
         "Tu peux me donner le lien de ton article ?":
             ethan "Bien sûr. Tiens, le voilà."
-            $ inventory["Article Ethan"] = 1 #ajoute l'article d'Ethan à l'inventaire
+            $ add_to_inventory("article_ethan") #ajoute l'article d'Ethan à l'inventaire
             $ a_parle_a_ethan = True #reconfirme que le joueur a parlé à Ethan
             "Tu as obtenu l'article d'Ethan. Tu pourras aller en vérifier la fiabilité !"
             jump retour_au_club

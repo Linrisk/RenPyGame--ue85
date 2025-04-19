@@ -1343,8 +1343,12 @@ label analyse_biais_3:
         "fiable":
             scene forum with dissolve
             show c_lola at left  
+            $ pause_music_with_fade()
+            play sound "bien_joue.mp3" loop fadein 0.2
             l "Parfait ! Ce témoignage est fiable et précieux pour notre article. En plus il a même mis le lien vers l'enquête, c'est top !" # Feedback bonne réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
             $ quete3_score += 1
     $ témoignages_récupérés.append("Témoignage 2 (Fiable)")  # Ajoute le témoignage à la liste des témoignages récupérés
     jump témoignage_4  # Saute vers le témoignage suivant

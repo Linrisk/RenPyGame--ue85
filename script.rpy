@@ -8,7 +8,7 @@ define l = Character("Lola", color="#4b01c2")
 define alexis = Character("Alexis (Rédacteur)", color="#00bfff")
 define technicienne = Character("Technicienne", color="#ff69b4")
 #Responsable graphisme et photographie - Quête 2 - Analyse la vidéo deepfake
-define alice = Character("Responsable d'interview", color="#32cd32")
+define alice = Character("Alice", color="#32cd32")
 define lucas = Character("Lucas", color="#fff200")
 define ethan = Character("Ethan", color="#a068ff")
 
@@ -209,6 +209,15 @@ init python:
         pourcentage = (float(total_score) / total_opportunity) * 100
         return pourcentage
 
+    def pause_music_with_fade():
+        renpy.music.set_volume(0.0, delay=1.5, channel="music")
+        renpy.pause(1.0)
+        renpy.music.set_pause(True, channel="music")
+
+    def resume_music_with_fade():
+        renpy.music.set_pause(False, channel="music")
+        renpy.music.set_volume(1.0, delay=0.5, channel="music")
+
 # Faites pas gaffe, c'est juste pour caler les zones de la map cliquable avec l'image
 screen debug_mouse_position():
     textbutton "Afficher Coordonnées" action Show("mouse_position") xpos 20 ypos 20
@@ -327,7 +336,7 @@ screen hud():
 
 # Destinations
 label start:
- 
+    play music "intro_jeu.ogg"volume 0.3
     scene bureau_proviseur
     with fade
     "Bienvenu au collège Beausoleil"
@@ -347,6 +356,8 @@ label start:
 
     c_proviseur "C'est cette vidéo qui a tout déclenché, elle montre Paul un élève de 5ème dans une situation plus que délicate, je vous laisse juger par vous même de la situation"
 
+    $ pause_music_with_fade()
+
     hide c_proviseur
 
     scene black
@@ -357,6 +368,8 @@ label start:
       
 
     "La vidéo est terminée."
+
+    $ resume_music_with_fade()
 
     show c_proviseur
     c_proviseur "La vidéo montre donc Paul, un élève de 5ème, après qu'il ait fais un trou dans un mur du collège avec une pioche."
@@ -410,6 +423,7 @@ label club_journalisme_intro:
     scene club_journalisme
     with fade
 
+    play music "presentation_club.mp3" fadeout 1.0 fadein 1.0
     "Vous voici dans la salle du club de journalisme, prêt à organiser votre enquête avec les autres membres du club."
 
     show character_alexis_sourit at left, zoom_perso
@@ -468,6 +482,7 @@ label club_journalisme_intro:
 label choix_quete:
     scene club_journalisme
     with fade
+    play music "choix_quete.ogg" fadeout 0.5 fadein 1
 
     if current_quest:
         if current_quest == "alexis":
@@ -505,6 +520,7 @@ label choix_quete:
 label quete_1:
     scene b_couloirs
     with fade #permet une transition visuelle progressive
+    play music "quete_1.wav" loop fadeout 0.5 fadein 1.0
 
     show c_alexis_sourit #affiche le personnage avec une expression choisi
 
@@ -519,12 +535,19 @@ label quete_1:
 
 label choix_destination:
     "C'est parti, est-ce que je commence par le hall ou les couloirs ?"
+
     menu:
-        "Aller aux couloirs":
-            jump scene_couloirs #emmène le joueur pour parler à Lucas
-            
-        "Aller au hall":
-            jump scene_hall #emmène le joueur pour parler à Ethan
+        "Aller aux couloirs" if not a_parle_a_lucas:
+            jump scene_couloirs  # emmène le joueur pour parler à Lucas
+
+        "Aller au hall" if not a_parle_a_ethan:
+            jump scene_hall  # emmène le joueur pour parler à Ethan
+
+    # Si le joueur a parlé aux deux personnages, passer à la réflexion
+    if a_parle_a_lucas and a_parle_a_ethan:
+        jump reflexion_apres_discussions
+    else:
+        jump choix_destination  # Représente le menu si un personnage n'a pas encore été rencontré
 
 #Etape 2, récupération de témoignages oraux
 
@@ -973,6 +996,7 @@ label conclusion_quete1:
 label quete_2:
     scene b_salle_info
     with fade
+    play music "quete_2.wav" loop fadeout 0.5 fadein 1.0
 
     show c_alice_sourit at left
     alice "On va analyser la vidéo de Paul ensemble."
@@ -1170,7 +1194,7 @@ label quete2_synthese:
 ## OCE LOG - A PARTIR DE LA TOUT EST BON 
 # Quête 3 - point d'entrée
 label quete_3:
-  
+    play music "quete_3.wav" loop fadeout 0.5 fadein 1.0
     scene club_journalisme with fade
     $ quests["respo_interview"] = True
     $ current_quest = None
@@ -1184,7 +1208,7 @@ label quete_3:
     jump ordinateur_lola
 
 # Scène 2 - Explication des biais
-label ordinateur_lola:
+label ordinateur_lola:  
     scene ordi_forum with dissolve
     show c_lola at left
     with dissolve
@@ -1213,11 +1237,15 @@ label témoignage_1:
 
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            $ pause_music_with_fade()
+            play sound "faux.mp3" loop fadein 0.2
             scene forum with dissolve
             show c_lola_p at left 
             with dissolve
             l "Hmm... Ok, moi je trouve que le lien qu'il fait est bizarre..."  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
             $ quete3_score -= 1  # Score = -1
             $ témoignages_récupérés.append("Témoignage 1 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
             jump témoignage_2  # Saute vers le témoignage suivant
@@ -1274,10 +1302,14 @@ label témoignage_2:
 
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            $ pause_music_with_fade()
+            play sound "faux.mp3" loop fadein 0.2
             scene forum with dissolve
             show c_lola_p at left
             l "Hmm… Ok, moi je trouve qu’il fait confiance un peu vite à ce Youtubeur, en plus il dit même pas qui c’est … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
             $ quete3_score -= 1  # Score = -1
             $ témoignages_récupérés.append("Témoignage 2 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
             $ add_to_inventory("temoignage2", fiable=False)
@@ -1318,8 +1350,12 @@ label analyse_biais_2:
         "fiable":
             scene forum with dissolve
             show c_lola_p at left
+            $ pause_music_with_fade()
+            play sound "faux.mp3" loop fadein 0.2
             l "Hmm… Ok, moi je trouve qu’il fait confiance un peu vite à ce Youtubeur, en plus il dit même pas qui c’est … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
     $ quete3_score -= 1  # Score = -1
     $ témoignages_récupérés.append("Témoignage 2 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
     $ add_to_inventory("temoignage3", fiable=True)
@@ -1335,10 +1371,14 @@ label témoignage_3:
 
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            $ pause_music_with_fade()
+            play sound "bien_joue.mp3" loop fadein 0.2
             scene forum with dissolve
             show c_lola at left  
             l "Parfait ! Ce témoignage est fiable et précieux pour notre article. En plus il a même mis le lien vers l'enquête, c'est top !" # Feedback bonne réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
             $ quete3_score += 1
             $ témoignages_récupérés.append("Témoignage 3 (Fiable)")
             $ add_to_inventory("temoignage4", fiable=False)
@@ -1352,9 +1392,11 @@ label témoignage_3:
 
 # Analyse du troisième témoignage
 label analyse_biais_3:
+    play music "quete_3.wav" loop fadeout 0.5 fadein 1.0
     menu:  # Crée un menu avec des options pour le joueur
         "Quel biais cognitif identifiez-vous ?"  # Question posée au joueur
         "Autorité":  # Option pour choisir le biais d'autorité
+        
             scene forum with dissolve
             show c_lola_p at left
             l "T’es sûr ? Pourtant il parle de journaliste indépendant, met sa source et tout, j’ai vraiment cru que c’était fiable. Mais bon c’est toi le spécialiste hein !"  # Feedback mauvaise réponse
@@ -1377,8 +1419,12 @@ label analyse_biais_3:
         "fiable":
             scene forum with dissolve
             show c_lola at left  
+            $ pause_music_with_fade()
+            play sound "bien_joue.mp3" loop fadein 0.2
             l "Parfait ! Ce témoignage est fiable et précieux pour notre article. En plus il a même mis le lien vers l'enquête, c'est top !" # Feedback bonne réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
             $ quete3_score += 1
     $ témoignages_récupérés.append("Témoignage 2 (Fiable)")  # Ajoute le témoignage à la liste des témoignages récupérés
     jump témoignage_4  # Saute vers le témoignage suivant
@@ -1392,10 +1438,14 @@ label témoignage_4:
     "Voici le quatrième témoignage, qu'en penses-tu ?"
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            $ pause_music_with_fade()
+            play sound "faux.mp3" loop fadein 0.2
             scene forum with dissolve
             show c_lola_p at left
             l "Ah ouais … Ok. Moi je trouve pas que ce qu’il dit soit basé sur des infos vraiment fondées son témoignage, puis bon il cite même pas les articles, et alors TikTok moi j’suis pas sûre de valider … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
             l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
             $ quete3_score -= 1  # Score = -1
             $ témoignages_récupérés.append("Témoignage 2 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
             jump conclusion_quete3  # Saute vers le témoignage suivant
@@ -1434,8 +1484,12 @@ label analyse_biais_4:
         "fiable":
             scene forum with dissolve
             show c_lola_p at left
+            $ pause_music_with_fade()
+            play sound "faux.mp3" loop fadein 0.2
             l "Ah ouais … Ok. Moi je trouve pas que ce qu’il dit soit basé sur des infos vraiment fondées son témoignage, puis bon il cite même pas les articles, et alors TikTok moi j’suis pas sûre de valider … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
             l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
     $ quete3_score -= 1  # Score = -1
     $ témoignages_récupérés.append("Témoignage 4 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
     jump conclusion_quete3  # Saute vers le témoignage suivant

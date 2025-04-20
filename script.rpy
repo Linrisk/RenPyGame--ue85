@@ -1177,9 +1177,9 @@ label quete_3:
     $ current_quest = None
     show c_lola with dissolve 
 
-    l "Salut ! Du coup, pour écrire notre article j’ai mis un message sur le Forum de l’ENT du collège pour voir si des élèves et des profs avaient envie de témoigner et de nous donner des informations."
+    l "Salut ! Du coup, pour récolter des témoignages pour qu'on puisse écrire notre article j’ai mis un message sur le Forum de l’ENT du collège pour voir si des élèves et des profs avaient envie de témoigner et de nous donner des informations."
     l "Je ne m’attendais pas à ça, mais le forum déborde. J’ai fait un premier tri mais là {b}j’ai vraiment besoin de toi pour trier les derniers messages.{/b}"
-    l "Le problème c’est que certains ont l’air un peu bizarres. Je pense qu’il y en a quelques-uns qui ne sont pas fiables et que mon cerveau me joue des tours."
+    l "Le problème c’est que certains témoignages ont l’air un peu bizarres. Je pense qu’il y en a quelques-uns qui ne sont pas fiables et que mon cerveau me joue des tours."
     l "Tu sais en classe on nous a parlé des {b}biais cognitifs{/b} et que ça pouvait nous empêcher d’y voir clair face à des informations ou des témoignages, mais viens on va regarder tout ça sur mon ordinateur."
 
     jump ordinateur_lola
@@ -1194,11 +1194,11 @@ label ordinateur_lola:
     l "{b}Corrélation illusoire :{/b} c'est quand on voit un lien qui n'existe pas réélement, entre deux événements."
     l "{b}Autorité :{/b} croire qu'une information est vraie simplement parce qu'elle provient d'une figure réputée, sans vérifier les faits."
     l "{b}Confirmation (cherry picking):{/b} ce biais nous pousse à ne retenir que les infos qui confirment nos croyances et à ignorer celles qui pourraient les contredire."
-    l "J'ai ajouté une fiche récap sur biais cognitifs à ton inventaire si jamais tu as besoin de te rappeler de chaque définition pendant qu'on analysera les témoignages !"
+    l "J'ai ajouté une fiche récap sur les  biais cognitifs à ton inventaire si jamais tu as besoin de te rappeler de chaque définition pendant qu'on analysera les témoignages !"
     $ add_to_inventory("fiche_biais")
 
     l "Donc là il faut vraiment que tu check chaque témoignage du forum. Pour chaque message, tu as deux options : Le Récupérer si tu sens qu’il est fiable ou l’Analyser si tu sens qu’il l’est pas. Et si en plus tu trouves quel biais entre en jeu, alors t’es un boss."
-    l "Après si t’analyses un témoignage qui au final est fiable c’est pas grave hein, vaut mieux être trop prudent que pas assez, tu pourras toujours le récupérer. Mais si tu dis qu’il est biaisé alors que non, c’est dommage on le mettra de côté pour rien."
+    l "Après si t’analyses un témoignage qui au final est fiable c’est pas grave hein, vaut mieux être trop prudent que pas assez, tu pourras toujours le récupérer. Mais si tu dis qu’il est biaisé alors que non, c’est dommage on le mettra de côté pour rien, et là c'est l'article qu'on va écrire qui sera bancal."
     l "Si t’as tout compris et que t’es Prêt(e), allons voir le forum !"
 
     jump témoignage_1
@@ -1480,15 +1480,15 @@ label conclusion_quete3:
     if quete3_score >= 3:
         show c_lola at center
         with dissolve
-        l "Bravo, grâce à toi on a des témoignages vraiment fiables pour l’article..."
+        l "Bravo, grâce à toi on a des témoignages vraiment fiables pour l’article, je pense que ca va vraiment avoir un impact positifs sur tout le collège..."
     elif quete3_score >= 2:
         show c_lola at center
         with dissolve
-        l "Je pense que tu as peut-être fait quelques erreurs, mais l'important est que tu as su repérer des messages douteux..."
+        l "Je pense que tu as peut-être fait quelques erreurs, mais l'important est que tu as su repérer des messages douteux... Ca nous évitera de raconter n'importequoi dans notre article"
     else:
         show c_lola_p at center
         with dissolve
-        l "Avec un peu de recul, je ne suis pas trop sûre de tes choix..."
+        l "Avec un peu de recul, je ne suis pas trop sûre de tes choix... J'ai peur de ce qu'on va raconter dans l'article, mais je te fais confiance c'est toi le spécialiste."
 
 
     $ quests["respo_interview"] = True

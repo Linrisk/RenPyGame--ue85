@@ -8,7 +8,7 @@ define l = Character("Lola", color="#4b01c2")
 define alexis = Character("Alexis (Rédacteur)", color="#00bfff")
 define technicienne = Character("Technicienne", color="#ff69b4")
 #Responsable graphisme et photographie - Quête 2 - Analyse la vidéo deepfake
-define alice = Character("Alice", color="#32cd32")
+define alice = Character("Responsable d'interview", color="#32cd32")
 define lucas = Character("Lucas", color="#fff200")
 define ethan = Character("Ethan", color="#a068ff")
 
@@ -190,6 +190,14 @@ init python:
     ##Je mets l'affichage inventaire en haut à gauche - fin le boutton
     config.overlay_screens.append("hud")
 
+    def pause_music_with_fade():
+            renpy.music.set_volume(0.0, delay=1.5, channel="music")
+            renpy.pause(1.0)
+            renpy.music.set_pause(True, channel="music")
+
+    def resume_music_with_fade():
+        renpy.music.set_pause(False, channel="music")
+        renpy.music.set_volume(1.0, delay=0.5, channel="music")
 
     def add_to_inventory(item_id, fiable=False):
         if item_id in items and len(inventory) < max_items:
@@ -208,15 +216,6 @@ init python:
         total_opportunity = quete1_opportunity + quete2_opportunity + quete3_opportunity
         pourcentage = (float(total_score) / total_opportunity) * 100
         return pourcentage
-
-    def pause_music_with_fade():
-        renpy.music.set_volume(0.0, delay=1.5, channel="music")
-        renpy.pause(1.0)
-        renpy.music.set_pause(True, channel="music")
-
-    def resume_music_with_fade():
-        renpy.music.set_pause(False, channel="music")
-        renpy.music.set_volume(1.0, delay=0.5, channel="music")
 
 # Faites pas gaffe, c'est juste pour caler les zones de la map cliquable avec l'image
 screen debug_mouse_position():
@@ -355,9 +354,7 @@ label start:
     c_proviseur "Une vague de désinformation secoue l'établissement..."
 
     c_proviseur "C'est cette vidéo qui a tout déclenché, elle montre Paul un élève de 5ème dans une situation plus que délicate, je vous laisse juger par vous même de la situation"
-
     $ pause_music_with_fade()
-
     hide c_proviseur
 
     scene black
@@ -368,7 +365,6 @@ label start:
       
 
     "La vidéo est terminée."
-
     $ resume_music_with_fade()
 
     show c_proviseur
@@ -422,7 +418,6 @@ label start:
 label club_journalisme_intro:
     scene club_journalisme
     with fade
-
     play music "presentation_club.mp3" fadeout 1.0 fadein 1.0
     "Vous voici dans la salle du club de journalisme, prêt à organiser votre enquête avec les autres membres du club."
 
@@ -484,20 +479,10 @@ label choix_quete:
     with fade
     play music "choix_quete.ogg" fadeout 0.5 fadein 1
 
-    if current_quest:
-        if current_quest == "alexis":
-            alexis "Tu n’as pas encore fini de récupérer ce que je t’ai demandé. Reviens quand ce sera fait."
-        elif current_quest == "technicienne":
-            technicienne "Tu dois encore travailler sur l’analyse de la vidéo. On se retrouve une fois que tu as terminé."
-        elif current_quest == "respo_interview":
-            respo_interview "Tu dois encore interroger quelques témoins. Reviens après."
-        jump retour_avant_quete
-
     "Alors maintenant, quelle piste décidez vous de suivre ?"
 
     if all(quests.values()):
-        "Félicitations, toutes les enquêtes sont terminées !"
-        return
+        jump scene6_feedback  # Modification clé ici
 
     menu:
         "Sélectionnez une des pistes d’enquête présentée par chaque membre du club :"
@@ -535,19 +520,12 @@ label quete_1:
 
 label choix_destination:
     "C'est parti, est-ce que je commence par le hall ou les couloirs ?"
-
     menu:
-        "Aller aux couloirs" if not a_parle_a_lucas:
-            jump scene_couloirs  # emmène le joueur pour parler à Lucas
-
-        "Aller au hall" if not a_parle_a_ethan:
-            jump scene_hall  # emmène le joueur pour parler à Ethan
-
-    # Si le joueur a parlé aux deux personnages, passer à la réflexion
-    if a_parle_a_lucas and a_parle_a_ethan:
-        jump reflexion_apres_discussions
-    else:
-        jump choix_destination  # Représente le menu si un personnage n'a pas encore été rencontré
+        "Aller aux couloirs":
+            jump scene_couloirs #emmène le joueur pour parler à Lucas
+            
+        "Aller au hall":
+            jump scene_hall #emmène le joueur pour parler à Ethan
 
 #Etape 2, récupération de témoignages oraux
 
@@ -997,7 +975,6 @@ label quete_2:
     scene b_salle_info
     with fade
     play music "quete_2.wav" loop fadeout 0.5 fadein 1.0
-
     show c_alice_sourit at left
     alice "On va analyser la vidéo de Paul ensemble."
     alice "Pour rappel, un deepfake, c'est une vidéo créée ou modifiée grâce à l'intelligence artificielle pour faire croire à quelque chose de faux. Il faut donc être très attentif aux détails !"
@@ -1208,7 +1185,7 @@ label quete_3:
     jump ordinateur_lola
 
 # Scène 2 - Explication des biais
-label ordinateur_lola:  
+label ordinateur_lola:
     scene ordi_forum with dissolve
     show c_lola at left
     with dissolve
@@ -1400,7 +1377,6 @@ label analyse_biais_3:
     menu:  # Crée un menu avec des options pour le joueur
         "Quel biais cognitif identifiez-vous ?"  # Question posée au joueur
         "Autorité":  # Option pour choisir le biais d'autorité
-        
             scene forum with dissolve
             show c_lola_p at left
             l "T’es sûr ? Pourtant il parle de journaliste indépendant, met sa source et tout, j’ai vraiment cru que c’était fiable. Mais bon c’est toi le spécialiste hein !"  # Feedback mauvaise réponse

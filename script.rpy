@@ -19,7 +19,7 @@ image cdi_bg = "images/decor_4.png"
 image b_salle_info = "images/backgrounds/b_salle_info.png"
 image b_couloirs = "images/backgrounds/b_couloirs.png"
 image b_couloirs_2 = "images/backgrounds/b_couloirs_2.png"
-image b_club = "images/b_club.png"
+image b_club = "images/backgrounds/b_club.png"
 image b_salle_technicien = "images/backgrounds/b_salle_technicien.png"  # Image de la salle de la technicienne
 
 # Images des personnages
@@ -118,49 +118,49 @@ init:
     default items = {
     "article_ethan": {
         "name": "Article Ethan", 
-        "image": "gui/icons/files.png", 
+        "image": "images/icons/temoignage_ethan.png", 
         "description": "Article d'Ethan sur les jeux vidéo.",
         "fiable": False
     },
     "article_lucas": {
         "name": "Article Lucas", 
-        "image": "gui/icons/files.png", 
+        "image": "images/icons/temoignage_lucas.png", 
         "description": "Article de Lucas sur les jeux vidéo.",
         "fiable": True
     },
      "temoignage1": {
         "name": "Témoignage Élève A", 
-        "image": "gui/icons/files.png",
+        "image": "images/icons/temoignage_1.png",
         "description": "Témoignage non vérifié sur l'incident",
         "fiable": False
     },
     "temoignage2": {
         "name": "Témoignage Youtubeur", 
-        "image": "gui/icons/files.png",
+        "image": "images/icons/temoignage_2.png",
         "description": "Déclaration non sourcée",
         "fiable": False
     },
     "temoignage3": {
         "name": "Témoignage Journal", 
-        "image": "gui/icons/files.png",
+        "image": "images/icons/temoignage_3.png",
         "description": "Témoignage vérifié avec source",
         "fiable": True
     },
     "temoignage4": {
         "name": "Témoignage TikTok", 
-        "image": "gui/icons/files.png",
+        "image": "images/icons/temoignage_4.png",
         "description": "Témoignage viral non corroboré",
         "fiable": False
     },
     "fiche_biais": {
         "name": "Fiche Biais Cognitifs", 
-        "image": "gui/icons/files.png",
+        "image": "images/icons/temoignage_biais.png",
         "description": "Mémo sur les biais courants",
         "fiable": True
     },
     "fiche_conclusion_video": {
     "name": "Rapport d'analyse vidéo", 
-    "image": "gui/icons/files.png",
+    "image": "images/icons/temoignage_video.png",
     "description": "Conclusion technique sur l'authenticité",
     "fiable": True  # À adapter selon le choix
     }
@@ -170,17 +170,20 @@ init:
 
 
 init python:
-    def toggle_selection(item):
-        if item in selected_items:
-            selected_items.remove(item)
+    def toggle_selection(item_id):
+        global score_items
+        if item_id in selected_items:
+            selected_items.remove(item_id)
         else:
-            selected_items.append(item)
+            selected_items.append(item_id)
+        score_items = update_score()
 
     def update_score():
         if not selected_items:
             return "0%"
-        fiables = sum(1 for i in selected_items if i.get("fiable", False))
+        fiables = sum(1 for i in selected_items if items[i]["fiable"])
         return f"{(fiables * 100) // len(selected_items)}%"
+
 
     quests = {
         "alexis": False,
@@ -199,15 +202,14 @@ init python:
         renpy.music.set_pause(False, channel="music")
         renpy.music.set_volume(1.0, delay=0.5, channel="music")
 
-    def add_to_inventory(item_id, fiable=False):
+    def add_to_inventory(item_id):
         if item_id in items and len(inventory) < max_items:
-            inventory.append({
-                "id": item_id,
-                "fiable": items[item_id].get("fiable", fiable)
-            })
-            renpy.notify(f"{items[item_id]['name']} ajouté à l'inventaire")
-            return True
+            if item_id not in inventory:
+                inventory.append(item_id)
+                renpy.notify(f"{items[item_id]['name']} ajouté à l'inventaire")
+                return True
         return False
+
 
 
 
@@ -273,24 +275,13 @@ screen tutoriel_inventaire():
 # Inventaire
 screen inventory_screen():
     modal True
-    add "gui/g_inventory.png" xalign 0.5 yalign 0.5
-
     frame:
-        background None
         xalign 0.5
         yalign 0.5
-        xsize 800
-        ysize 600
-
         vbox:
-            spacing 20
-            xalign 0.5
-            yalign 0.0
             text "Inventaire" size 40 xalign 0.5
-
             grid 5 2:
                 spacing 10
-                xalign 0.5
                 for item_id in inventory:
                     use inventory_slot(item_id)
                 for i in range(max_items - len(inventory)):
@@ -298,35 +289,21 @@ screen inventory_screen():
                         xsize 150
                         ysize 150
                         text "Vide" xalign 0.5 yalign 0.5
-
-        textbutton "Fermer" action Hide("inventory_screen") xalign 0.5 yalign 0.95
-
-
-##Screen pour les objets et pour l'affichage les objets dans l'inventaire et les objets dans les étiquettes  
+            textbutton "Fermer" action Hide("inventory_screen") xalign 0.5 yalign 0.95
 
 screen inventory_slot(item_id):
-    default show_tooltip = False
-
     frame:
         xsize 150
         ysize 150
         imagebutton:
             idle items[item_id]["image"]
             action Show("item_description", item_id=item_id)
-            hovered SetScreenVariable("show_tooltip", True)
-            unhovered SetScreenVariable("show_tooltip", False)
             xalign 0.5
             yalign 0.5
+        text items[item_id]["name"] size 18 xalign 0.5
+        text ("(Fiable)" if items[item_id]["fiable"] else "(Douteux)") size 14 xalign 0.5
 
-        if show_tooltip:
-            frame:
-                background "#333c"
-                xsize 140
-                ysize 40
-                xpos 10
-                ypos 110
-                text items[item_id]["name"] size 18 xalign 0.5
-                text items[item_id]["description"] size 14 xalign 0.5
+
 
 screen hud():
     textbutton "Inventaire" action ToggleScreen("inventory_screen") xpos 20 ypos 20
@@ -572,12 +549,12 @@ label scene_couloirs:
     menu:    #permet au joeur de choisir entre deux options
         "Si des scientifiques le disent, alors ça doit être vrai.":
             "Tu acceptes l'information sans poser de question."
-            $ quete1_score -= 1  # mauvais choix, ne gagne pas de points
+             # mauvais choix, ne gagne pas de points
 
         "Est-ce que tu as une source pour ce que tu dis ?":
             lucas "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
             $ quete1_score += 1  # bon choix, gagne 1 point
-            $ add_to_inventory("article_lucas", fiable=True) # ajoute l'article de Lucas à l'inventaire
+            $ add_to_inventory("article_lucas") # ajoute l'article de Lucas à l'inventaire
             "Tu as obtenu l'article de Lucas. Tu pourras aller en vérifier la fiabilité !"
         
     $ a_parle_a_lucas = True # variable avec dollar qu'on peut utiliser au cours du jeu, ici elle sert à vérifier que le joueur a bien parlé avec Lucas (variable originelle avant start du jeu)
@@ -623,13 +600,13 @@ label scene_hall:
     menu: #ouvre des choix après le dialogue
         "Si des scientifiques le disent, alors ça doit être vrai.":
             "Tu acceptes l'information sans poser de question."
-            $ quete1_score -= 1  # Mauvais choix
+             # Mauvais choix
 
         "Est-ce que tu as une source pour ce que tu dis ?":
             show c_ethan
             ethan "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
             $ quete1_score += 1  # Bon choix
-            $ add_to_inventory("article_ethan", fiable=False)# Ajoute l'article d'Ethan à l'inventaire
+            $ add_to_inventory("article_ethan")# Ajoute l'article d'Ethan à l'inventaire
             "Tu as obtenu l'article d'Ethan. Tu pourras aller en vérifier la fiabilité !"
 
     $ a_parle_a_ethan = True #valide auprès du jeu que le joueur a parlé à Ethan
@@ -655,7 +632,7 @@ label reflexion_apres_discussions:
     jump club_journalisme #le joueur est amené au label suivant
 
 
-
+### PROBLEME INVENTORY  A DEBLOQUER POUR ACCES A CETTE PARTIE 
 label club_journalisme:
     scene b_club
     with fade
@@ -1147,7 +1124,7 @@ label quete2_synthese:
             alice "Tu ignores tous les indices que nous avons pourtant trouvés ensemble..."
             $ quests["technicienne"] = True
             $ current_quest = None
-            $ add_to_inventory("fiche_conclusion_video", fiable=True)
+            $ add_to_inventory("fiche_conclusion_video")
             jump choix_quete
 
         "La vidéo est un deepfake":
@@ -1155,14 +1132,14 @@ label quete2_synthese:
             alice "Bravo ! Ta conclusion s'appuie sur une analyse solide."
             $ quests["technicienne"] = True
             $ current_quest = None
-            $ add_to_inventory("fiche_conclusion_video", fiable=False)
+            $ add_to_inventory("fiche_conclusion_video")
             jump choix_quete
 
         "Manque de preuves":
             alice "La prudence est une qualité, mais il faut parfois trancher."
             $ quests["technicienne"] = True
             $ current_quest = None
-            $ add_to_inventory("fiche_conclusion_video", fiable=False)
+            $ add_to_inventory("fiche_conclusion_video")
             jump choix_quete
 
 
@@ -1266,7 +1243,7 @@ label analyse_biais_1:
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
     $ quete3_score -= 1  # Score = -1
     $ témoignages_récupérés.append("Témoignage 1 (Biaisé)") 
-    $ add_to_inventory("temoignage1", fiable=False) # Ajoute le témoignage à la liste des témoignages récupérés
+    $ add_to_inventory("temoignage1") # Ajoute le témoignage à la liste des témoignages récupérés
     jump témoignage_2  # Saute vers le témoignage suivant
 
 label témoignage_2:
@@ -1289,7 +1266,7 @@ label témoignage_2:
             $ resume_music_with_fade()
             $ quete3_score -= 1  # Score = -1
             $ témoignages_récupérés.append("Témoignage 2 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
-            $ add_to_inventory("temoignage2", fiable=False)
+            $ add_to_inventory("temoignage2")
 
             jump témoignage_3  # Saute vers le témoignage suivant
 
@@ -1335,7 +1312,7 @@ label analyse_biais_2:
             $ resume_music_with_fade()
     $ quete3_score -= 1  # Score = -1
     $ témoignages_récupérés.append("Témoignage 2 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
-    $ add_to_inventory("temoignage3", fiable=True)
+    $ add_to_inventory("temoignage3")
     jump témoignage_3  # Saute vers le témoignage suivant
 
 label témoignage_3:
@@ -1358,7 +1335,7 @@ label témoignage_3:
             $ resume_music_with_fade()
             $ quete3_score += 1
             $ témoignages_récupérés.append("Témoignage 3 (Fiable)")
-            $ add_to_inventory("temoignage4", fiable=False)
+            $ add_to_inventory("temoignage4")
             jump témoignage_4
 
         "Analyser ce témoignage":  # Option pour analyser le témoignage
@@ -1496,20 +1473,21 @@ label conclusion_quete3:
     jump choix_quete
 
 
-#AJout derniere scene oce
+#Ajout derniere scene oce
 
 label scene6_feedback:
-    scene bg_club_journalisme
+    scene club_journalisme
     with fade
 
-    show alexis neutre at left
-    show alice neutre at center
-    show lola neutre at right
-
+    show character_alexis_sourit at left, zoom_perso
+    show technicienne at center
+    show c_lola at right
+    
     "Vous regroupez toutes les preuves collectées autour de la table du club."
-
+    
+## VERIFIER SI FAILLE ALYZEE OU SI D'OFFICE IL RECUPERE LES 2?
     # Feedback Alexis (Quête 1)
-    if quete1_score >= 2:
+    if quete1_score <=1:
         alexis ""
         alexis ""
     else:
@@ -1525,9 +1503,9 @@ label scene6_feedback:
 
     # Feedback Lola (Quête 3)
     if quete3_score >= 2:
-        lola ""
+        l ""
     else:
-        lola ""
+        l ""
 
     jump scene6_article
 
@@ -1540,14 +1518,14 @@ label scene6_article:
     alexis "Maintenant, sélectionne les éléments les plus pertinents pour l'article final :"
     
     # Vérification inventaire minimum
-    if len(inventaire) < 3:
+    if len(inventory) < 3:
         alexis "Attends... Tu as loupe des éléments crutiaux, la prochaine fois tu devras faire plus gaffe aux  !"
         $ article_incomplet = True
         jump scene7_evaluation
 
 
     # Screen de sélection des éléments
-    call screen selection_article(inventaire)
+    call screen selection_article()
 
     # Calcul score final
     $ score_quetes = ( (quete1_score + quete2_score + quete3_score) / 10 ) * 100  # 12 = 3 quêtes × 4 pts max
@@ -1561,29 +1539,25 @@ label scene6_article:
 
     jump scene7_evaluation
 
-screen selection_article(items):
-
+screen selection_article():
     frame:
         xalign 0.5
         yalign 0.1
         vbox:
             text "Éléments disponibles :" bold True
-            for item in items:
-                textbutton item["nom"]:
-                    action Function(toggle_selection, item), SetVariable("score_items", update_score())
-                    tooltip item["description"]
-
+            for item_id in inventory:
+                textbutton items[item_id]["name"]:
+                    action Function(toggle_selection, item_id)
+                    tooltip items[item_id]["description"]
     frame:
         xalign 0.5
-        yalign 0.9
+        yalign 0.3
         vbox:
             text "Sélection actuelle :"
-            for item in selected_items:
-                text item["nom"] + (" (fiable)" if item.get("fiable", False) else " (douteux)")
-            
+            for item_id in selected_items:
+                text items[item_id]["name"] + (" (fiable)" if items[item_id]["fiable"] else " (douteux)")
             text "Crédibilité : [score_items]"
-            
-            if len(selected_items) >= 5:
+            if len(selected_items) >= 3:
                 textbutton "Valider la sélection" action Return()
             else:
                 text "Minimum 5 éléments requis" color "#ff0000"
@@ -1596,9 +1570,10 @@ label scene7_evaluation:
     with fade
 
       # Calcul du score des items
-    $ nb_fiables = sum(1 for item in selected_items if item["fiable"])
+    $ nb_fiables = sum(1 for item_id in selected_items if items[item_id]["fiable"])
     $ total_items = len(selected_items)
     $ score_items = (nb_fiables / total_items * 100) if total_items > 0 else 0
+
     
     # Calcul du score final
     $ score_quetes = (quete1_score + quete2_score + quete3_score) * 10

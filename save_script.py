@@ -19,7 +19,7 @@ image cdi_bg = "images/decor_4.png"
 image b_salle_info = "images/backgrounds/b_salle_info.png"
 image b_couloirs = "images/backgrounds/b_couloirs.png"
 image b_couloirs_2 = "images/backgrounds/b_couloirs_2.png"
-image b_club = "images/b_club.png"
+image b_club = "images/backgrounds/b_club.png"
 image b_salle_technicien = "images/backgrounds/b_salle_technicien.png"  # Image de la salle de la technicienne
 
 # Images des personnages
@@ -87,7 +87,8 @@ default a_parle_a_ethan = False
 default article_incomplet= False #si le joueur n'a pas récupéré tous les témoignages, il ne peut pas publier l'article
 default nombre_preuves_fiables = 0
 default total_preuves = 0
-
+default selected_items = []
+default score_items = "0%"
 
 #Zoom personnage dialogues 
 init: 
@@ -115,12 +116,75 @@ init:
 
     # Définition des objets récupérables
     default items = {
-        "article_ethan": {"name": "article Ethan", "image": "gui/icons/files.png", "description": "Article d'Ethan sur les jeux vidéo."},
-        "article_lucas": {"name": "article Lucas", "image": "gui/icons/files.png", "description": "Article de Lucas sur les jeux vidéo."},
-        
+    "article_ethan": {
+        "name": "Article Ethan", 
+        "image": "images/icons/temoignage_ethan.png", 
+        "description": "Article d'Ethan sur les jeux vidéo.",
+        "fiable": False
+    },
+    "article_lucas": {
+        "name": "Article Lucas", 
+        "image": "images/icons/temoignage_lucas.png", 
+        "description": "Article de Lucas sur les jeux vidéo.",
+        "fiable": True
+    },
+     "temoignage1": {
+        "name": "Témoignage Élève A", 
+        "image": "images/icons/temoignage_1.png",
+        "description": "Témoignage non vérifié sur l'incident",
+        "fiable": False
+    },
+    "temoignage2": {
+        "name": "Témoignage Youtubeur", 
+        "image": "images/icons/temoignage_2.png",
+        "description": "Déclaration non sourcée",
+        "fiable": False
+    },
+    "temoignage3": {
+        "name": "Témoignage Journal", 
+        "image": "images/icons/temoignage_3.png",
+        "description": "Témoignage vérifié avec source",
+        "fiable": True
+    },
+    "temoignage4": {
+        "name": "Témoignage TikTok", 
+        "image": "images/icons/temoignage_4.png",
+        "description": "Témoignage viral non corroboré",
+        "fiable": False
+    },
+    "fiche_biais": {
+        "name": "Fiche Biais Cognitifs", 
+        "image": "images/icons/temoignage_biais.png",
+        "description": "Mémo sur les biais courants",
+        "fiable": True
+    },
+    "fiche_conclusion_video": {
+    "name": "Rapport d'analyse vidéo", 
+    "image": "images/icons/temoignage_video.png",
+    "description": "Conclusion technique sur l'authenticité",
+    "fiable": True  # À adapter selon le choix
     }
 
+
+}
+
+
 init python:
+    def toggle_selection(item_id):
+        global score_items
+        if item_id in selected_items:
+            selected_items.remove(item_id)
+        else:
+            selected_items.append(item_id)
+        score_items = update_score()
+
+    def update_score():
+        if not selected_items:
+            return "0%"
+        fiables = sum(1 for i in selected_items if items[i]["fiable"])
+        return f"{(fiables * 100) // len(selected_items)}%"
+
+
     quests = {
         "alexis": False,
         "technicienne": False,
@@ -129,17 +193,25 @@ init python:
     ##Je mets l'affichage inventaire en haut à gauche - fin le boutton
     config.overlay_screens.append("hud")
 
+    def pause_music_with_fade():
+            renpy.music.set_volume(0.0, delay=1.5, channel="music")
+            renpy.pause(1.0)
+            renpy.music.set_pause(True, channel="music")
+
+    def resume_music_with_fade():
+        renpy.music.set_pause(False, channel="music")
+        renpy.music.set_volume(1.0, delay=0.5, channel="music")
 
     def add_to_inventory(item_id):
-        if item_id in items and len(inventory) < max_items and item_id not in inventory:
-            inventory.append(item_id)
-            renpy.notify(f"{items[item_id]['name']} ajouté à l'inventaire")
-            return True
-        elif item_id in inventory:
-            renpy.notify("Vous avez déjà cet objet")
-        else:
-            renpy.notify("Inventaire plein")
-            return False
+        if item_id in items and len(inventory) < max_items:
+            if item_id not in inventory:
+                inventory.append(item_id)
+                renpy.notify(f"{items[item_id]['name']} ajouté à l'inventaire")
+                return True
+        return False
+
+
+
 
     def calculer_pourcentage(): # pour calculer le total du score = % de fiabilité de l'article final
         total_score = quete1_score + quete2_score + quete3_score
@@ -203,24 +275,13 @@ screen tutoriel_inventaire():
 # Inventaire
 screen inventory_screen():
     modal True
-    add "gui/g_inventory.png" xalign 0.5 yalign 0.5
-
     frame:
-        background None
         xalign 0.5
         yalign 0.5
-        xsize 800
-        ysize 600
-
         vbox:
-            spacing 20
-            xalign 0.5
-            yalign 0.0
             text "Inventaire" size 40 xalign 0.5
-
             grid 5 2:
                 spacing 10
-                xalign 0.5
                 for item_id in inventory:
                     use inventory_slot(item_id)
                 for i in range(max_items - len(inventory)):
@@ -228,35 +289,21 @@ screen inventory_screen():
                         xsize 150
                         ysize 150
                         text "Vide" xalign 0.5 yalign 0.5
-
-        textbutton "Fermer" action Hide("inventory_screen") xalign 0.5 yalign 0.95
-
-
-##Screen pour les objets et pour l'affichage les objets dans l'inventaire et les objets dans les étiquettes  
+            textbutton "Fermer" action Hide("inventory_screen") xalign 0.5 yalign 0.95
 
 screen inventory_slot(item_id):
-    default show_tooltip = False
-
     frame:
         xsize 150
         ysize 150
         imagebutton:
             idle items[item_id]["image"]
             action Show("item_description", item_id=item_id)
-            hovered SetScreenVariable("show_tooltip", True)
-            unhovered SetScreenVariable("show_tooltip", False)
             xalign 0.5
             yalign 0.5
+        text items[item_id]["name"] size 18 xalign 0.5
+        text ("(Fiable)" if items[item_id]["fiable"] else "(Douteux)") size 14 xalign 0.5
 
-        if show_tooltip:
-            frame:
-                background "#333c"
-                xsize 140
-                ysize 40
-                xpos 10
-                ypos 110
-                text items[item_id]["name"] size 18 xalign 0.5
-                text items[item_id]["description"] size 14 xalign 0.5
+
 
 screen hud():
     textbutton "Inventaire" action ToggleScreen("inventory_screen") xpos 20 ypos 20
@@ -265,7 +312,7 @@ screen hud():
 
 # Destinations
 label start:
- 
+    play music "intro_jeu.ogg"volume 0.3
     scene bureau_proviseur
     with fade
     "Bienvenu au collège Beausoleil"
@@ -284,7 +331,7 @@ label start:
     c_proviseur "Une vague de désinformation secoue l'établissement..."
 
     c_proviseur "C'est cette vidéo qui a tout déclenché, elle montre Paul un élève de 5ème dans une situation plus que délicate, je vous laisse juger par vous même de la situation"
-
+    $ pause_music_with_fade()
     hide c_proviseur
 
     scene black
@@ -295,6 +342,7 @@ label start:
       
 
     "La vidéo est terminée."
+    $ resume_music_with_fade()
 
     show c_proviseur
     c_proviseur "La vidéo montre donc Paul, un élève de 5ème, après qu'il ait fais un trou dans un mur du collège avec une pioche."
@@ -347,7 +395,7 @@ label start:
 label club_journalisme_intro:
     scene club_journalisme
     with fade
-
+    play music "presentation_club.mp3" fadeout 1.0 fadein 1.0
     "Vous voici dans la salle du club de journalisme, prêt à organiser votre enquête avec les autres membres du club."
 
     show character_alexis_sourit at left, zoom_perso
@@ -406,21 +454,12 @@ label club_journalisme_intro:
 label choix_quete:
     scene club_journalisme
     with fade
-
-    if current_quest:
-        if current_quest == "alexis":
-            alexis "Tu n’as pas encore fini de récupérer ce que je t’ai demandé. Reviens quand ce sera fait."
-        elif current_quest == "technicienne":
-            technicienne "Tu dois encore travailler sur l’analyse de la vidéo. On se retrouve une fois que tu as terminé."
-        elif current_quest == "respo_interview":
-            respo_interview "Tu dois encore interroger quelques témoins. Reviens après."
-        jump retour_avant_quete
+    play music "choix_quete.ogg" fadeout 0.5 fadein 1
 
     "Alors maintenant, quelle piste décidez vous de suivre ?"
 
     if all(quests.values()):
-        "Félicitations, toutes les enquêtes sont terminées !"
-        return
+        jump scene6_feedback  # Modification clé ici
 
     menu:
         "Sélectionnez une des pistes d’enquête présentée par chaque membre du club :"
@@ -443,6 +482,7 @@ label choix_quete:
 label quete_1:
     scene b_couloirs
     with fade #permet une transition visuelle progressive
+    play music "quete_1.wav" loop fadeout 0.5 fadein 1.0
 
     show c_alexis_sourit #affiche le personnage avec une expression choisi
 
@@ -509,12 +549,12 @@ label scene_couloirs:
     menu:    #permet au joeur de choisir entre deux options
         "Si des scientifiques le disent, alors ça doit être vrai.":
             "Tu acceptes l'information sans poser de question."
-            $ quete1_score -= 1  # mauvais choix, ne gagne pas de points
+             # mauvais choix, ne gagne pas de points
 
         "Est-ce que tu as une source pour ce que tu dis ?":
             lucas "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
             $ quete1_score += 1  # bon choix, gagne 1 point
-            $ add_to_inventory("article_lucas")# ajoute l'article de Lucas à l'inventaire
+            $ add_to_inventory("article_lucas") # ajoute l'article de Lucas à l'inventaire
             "Tu as obtenu l'article de Lucas. Tu pourras aller en vérifier la fiabilité !"
         
     $ a_parle_a_lucas = True # variable avec dollar qu'on peut utiliser au cours du jeu, ici elle sert à vérifier que le joueur a bien parlé avec Lucas (variable originelle avant start du jeu)
@@ -560,7 +600,7 @@ label scene_hall:
     menu: #ouvre des choix après le dialogue
         "Si des scientifiques le disent, alors ça doit être vrai.":
             "Tu acceptes l'information sans poser de question."
-            $ quete1_score -= 1  # Mauvais choix
+             # Mauvais choix
 
         "Est-ce que tu as une source pour ce que tu dis ?":
             show c_ethan
@@ -592,7 +632,7 @@ label reflexion_apres_discussions:
     jump club_journalisme #le joueur est amené au label suivant
 
 
-
+### PROBLEME INVENTORY  A DEBLOQUER POUR ACCES A CETTE PARTIE 
 label club_journalisme:
     scene b_club
     with fade
@@ -911,7 +951,7 @@ label conclusion_quete1:
 label quete_2:
     scene b_salle_info
     with fade
-
+    play music "quete_2.wav" loop fadeout 0.5 fadein 1.0
     show c_alice_sourit at left
     alice "On va analyser la vidéo de Paul ensemble."
     alice "Pour rappel, un deepfake, c'est une vidéo créée ou modifiée grâce à l'intelligence artificielle pour faire croire à quelque chose de faux. Il faut donc être très attentif aux détails !"
@@ -1084,6 +1124,7 @@ label quete2_synthese:
             alice "Tu ignores tous les indices que nous avons pourtant trouvés ensemble..."
             $ quests["technicienne"] = True
             $ current_quest = None
+            $ add_to_inventory("fiche_conclusion_video")
             jump choix_quete
 
         "La vidéo est un deepfake":
@@ -1091,12 +1132,14 @@ label quete2_synthese:
             alice "Bravo ! Ta conclusion s'appuie sur une analyse solide."
             $ quests["technicienne"] = True
             $ current_quest = None
+            $ add_to_inventory("fiche_conclusion_video")
             jump choix_quete
 
         "Manque de preuves":
             alice "La prudence est une qualité, mais il faut parfois trancher."
             $ quests["technicienne"] = True
             $ current_quest = None
+            $ add_to_inventory("fiche_conclusion_video")
             jump choix_quete
 
 
@@ -1105,15 +1148,15 @@ label quete2_synthese:
 ## OCE LOG - A PARTIR DE LA TOUT EST BON 
 # Quête 3 - point d'entrée
 label quete_3:
-  
+    play music "quete_3.wav" loop fadeout 0.5 fadein 1.0
     scene club_journalisme with fade
     $ quests["respo_interview"] = True
     $ current_quest = None
     show c_lola with dissolve 
 
-    l "Salut ! Du coup, pour écrire notre article j’ai mis un message sur le Forum de l’ENT du collège pour voir si des élèves et des profs avaient envie de témoigner et de nous donner des informations."
+    l "Salut ! Du coup, pour récolter des témoignages pour qu'on puisse écrire notre article j’ai mis un message sur le Forum de l’ENT du collège pour voir si des élèves et des profs avaient envie de témoigner et de nous donner des informations."
     l "Je ne m’attendais pas à ça, mais le forum déborde. J’ai fait un premier tri mais là {b}j’ai vraiment besoin de toi pour trier les derniers messages.{/b}"
-    l "Le problème c’est que certains ont l’air un peu bizarres. Je pense qu’il y en a quelques-uns qui ne sont pas fiables et que mon cerveau me joue des tours."
+    l "Le problème c’est que certains témoignages ont l’air un peu bizarres. Je pense qu’il y en a quelques-uns qui ne sont pas fiables et que mon cerveau me joue des tours."
     l "Tu sais en classe on nous a parlé des {b}biais cognitifs{/b} et que ça pouvait nous empêcher d’y voir clair face à des informations ou des témoignages, mais viens on va regarder tout ça sur mon ordinateur."
 
     jump ordinateur_lola
@@ -1128,11 +1171,11 @@ label ordinateur_lola:
     l "{b}Corrélation illusoire :{/b} c'est quand on voit un lien qui n'existe pas réélement, entre deux événements."
     l "{b}Autorité :{/b} croire qu'une information est vraie simplement parce qu'elle provient d'une figure réputée, sans vérifier les faits."
     l "{b}Confirmation (cherry picking):{/b} ce biais nous pousse à ne retenir que les infos qui confirment nos croyances et à ignorer celles qui pourraient les contredire."
-    l "J'ai ajouté une fiche récap sur biais cognitifs à ton inventaire si jamais tu as besoin de te rappeler de chaque définition pendant qu'on analysera les témoignages !"
+    l "J'ai ajouté une fiche récap sur les  biais cognitifs à ton inventaire si jamais tu as besoin de te rappeler de chaque définition pendant qu'on analysera les témoignages !"
     $ add_to_inventory("fiche_biais")
 
     l "Donc là il faut vraiment que tu check chaque témoignage du forum. Pour chaque message, tu as deux options : Le Récupérer si tu sens qu’il est fiable ou l’Analyser si tu sens qu’il l’est pas. Et si en plus tu trouves quel biais entre en jeu, alors t’es un boss."
-    l "Après si t’analyses un témoignage qui au final est fiable c’est pas grave hein, vaut mieux être trop prudent que pas assez, tu pourras toujours le récupérer. Mais si tu dis qu’il est biaisé alors que non, c’est dommage on le mettra de côté pour rien."
+    l "Après si t’analyses un témoignage qui au final est fiable c’est pas grave hein, vaut mieux être trop prudent que pas assez, tu pourras toujours le récupérer. Mais si tu dis qu’il est biaisé alors que non, c’est dommage on le mettra de côté pour rien, et là c'est l'article qu'on va écrire qui sera bancal."
     l "Si t’as tout compris et que t’es Prêt(e), allons voir le forum !"
 
     jump témoignage_1
@@ -1148,11 +1191,15 @@ label témoignage_1:
 
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            $ pause_music_with_fade()
+            play sound "faux.mp3" loop fadein 0.2
             scene forum with dissolve
             show c_lola_p at left 
             with dissolve
             l "Hmm... Ok, moi je trouve que le lien qu'il fait est bizarre..."  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
             $ quete3_score -= 1  # Score = -1
             $ témoignages_récupérés.append("Témoignage 1 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
             jump témoignage_2  # Saute vers le témoignage suivant
@@ -1195,7 +1242,8 @@ label analyse_biais_1:
             l "Hmm... Ok, moi je trouve que le lien qu'il fait est bizarre..."  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
     $ quete3_score -= 1  # Score = -1
-    $ témoignages_récupérés.append("Témoignage 1 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
+    $ témoignages_récupérés.append("Témoignage 1 (Biaisé)") 
+    $ add_to_inventory("temoignage1") # Ajoute le témoignage à la liste des témoignages récupérés
     jump témoignage_2  # Saute vers le témoignage suivant
 
 label témoignage_2:
@@ -1208,12 +1256,18 @@ label témoignage_2:
 
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            $ pause_music_with_fade()
+            play sound "faux.mp3" loop fadein 0.2
             scene forum with dissolve
             show c_lola_p at left
             l "Hmm… Ok, moi je trouve qu’il fait confiance un peu vite à ce Youtubeur, en plus il dit même pas qui c’est … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
             $ quete3_score -= 1  # Score = -1
             $ témoignages_récupérés.append("Témoignage 2 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
+            $ add_to_inventory("temoignage2")
+
             jump témoignage_3  # Saute vers le témoignage suivant
 
         "Analyser ce témoignage":  # Option pour analyser le témoignage
@@ -1250,10 +1304,15 @@ label analyse_biais_2:
         "fiable":
             scene forum with dissolve
             show c_lola_p at left
+            $ pause_music_with_fade()
+            play sound "faux.mp3" loop fadein 0.2
             l "Hmm… Ok, moi je trouve qu’il fait confiance un peu vite à ce Youtubeur, en plus il dit même pas qui c’est … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
     $ quete3_score -= 1  # Score = -1
     $ témoignages_récupérés.append("Témoignage 2 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
+    $ add_to_inventory("temoignage3")
     jump témoignage_3  # Saute vers le témoignage suivant
 
 label témoignage_3:
@@ -1266,12 +1325,17 @@ label témoignage_3:
 
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            $ pause_music_with_fade()
+            play sound "bien_joue.mp3" loop fadein 0.2
             scene forum with dissolve
             show c_lola at left  
             l "Parfait ! Ce témoignage est fiable et précieux pour notre article. En plus il a même mis le lien vers l'enquête, c'est top !" # Feedback bonne réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
             $ quete3_score += 1
             $ témoignages_récupérés.append("Témoignage 3 (Fiable)")
+            $ add_to_inventory("temoignage4")
             jump témoignage_4
 
         "Analyser ce témoignage":  # Option pour analyser le témoignage
@@ -1282,6 +1346,7 @@ label témoignage_3:
 
 # Analyse du troisième témoignage
 label analyse_biais_3:
+    play music "quete_3.wav" loop fadeout 0.5 fadein 1.0
     menu:  # Crée un menu avec des options pour le joueur
         "Quel biais cognitif identifiez-vous ?"  # Question posée au joueur
         "Autorité":  # Option pour choisir le biais d'autorité
@@ -1307,8 +1372,12 @@ label analyse_biais_3:
         "fiable":
             scene forum with dissolve
             show c_lola at left  
+            $ pause_music_with_fade()
+            play sound "bien_joue.mp3" loop fadein 0.2
             l "Parfait ! Ce témoignage est fiable et précieux pour notre article. En plus il a même mis le lien vers l'enquête, c'est top !" # Feedback bonne réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
             $ quete3_score += 1
     $ témoignages_récupérés.append("Témoignage 2 (Fiable)")  # Ajoute le témoignage à la liste des témoignages récupérés
     jump témoignage_4  # Saute vers le témoignage suivant
@@ -1322,10 +1391,14 @@ label témoignage_4:
     "Voici le quatrième témoignage, qu'en penses-tu ?"
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
+            $ pause_music_with_fade()
+            play sound "faux.mp3" loop fadein 0.2
             scene forum with dissolve
             show c_lola_p at left
             l "Ah ouais … Ok. Moi je trouve pas que ce qu’il dit soit basé sur des infos vraiment fondées son témoignage, puis bon il cite même pas les articles, et alors TikTok moi j’suis pas sûre de valider … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
             l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
             $ quete3_score -= 1  # Score = -1
             $ témoignages_récupérés.append("Témoignage 2 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
             jump conclusion_quete3  # Saute vers le témoignage suivant
@@ -1364,8 +1437,12 @@ label analyse_biais_4:
         "fiable":
             scene forum with dissolve
             show c_lola_p at left
+            $ pause_music_with_fade()
+            play sound "faux.mp3" loop fadein 0.2
             l "Ah ouais … Ok. Moi je trouve pas que ce qu’il dit soit basé sur des infos vraiment fondées son témoignage, puis bon il cite même pas les articles, et alors TikTok moi j’suis pas sûre de valider … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
             l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
     $ quete3_score -= 1  # Score = -1
     $ témoignages_récupérés.append("Témoignage 4 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
     jump conclusion_quete3  # Saute vers le témoignage suivant
@@ -1380,15 +1457,15 @@ label conclusion_quete3:
     if quete3_score >= 3:
         show c_lola at center
         with dissolve
-        l "Bravo, grâce à toi on a des témoignages vraiment fiables pour l’article..."
+        l "Bravo, grâce à toi on a des témoignages vraiment fiables pour l’article, je pense que ca va vraiment avoir un impact positifs sur tout le collège..."
     elif quete3_score >= 2:
         show c_lola at center
         with dissolve
-        l "Je pense que tu as peut-être fait quelques erreurs, mais l'important est que tu as su repérer des messages douteux..."
+        l "Je pense que tu as peut-être fait quelques erreurs, mais l'important est que tu as su repérer des messages douteux... Ca nous évitera de raconter n'importequoi dans notre article"
     else:
         show c_lola_p at center
         with dissolve
-        l "Avec un peu de recul, je ne suis pas trop sûre de tes choix..."
+        l "Avec un peu de recul, je ne suis pas trop sûre de tes choix... J'ai peur de ce qu'on va raconter dans l'article, mais je te fais confiance c'est toi le spécialiste."
 
 
     $ quests["respo_interview"] = True
@@ -1396,20 +1473,21 @@ label conclusion_quete3:
     jump choix_quete
 
 
-#AJout derniere scene oce
+#Ajout derniere scene oce
 
 label scene6_feedback:
-    scene bg_club_journalisme
+    scene club_journalisme
     with fade
 
-    show alexis neutre at left
-    show alice neutre at center
-    show lola neutre at right
-
+    show character_alexis_sourit at left, zoom_perso
+    show technicienne at center
+    show c_lola at right
+    
     "Vous regroupez toutes les preuves collectées autour de la table du club."
-
+    
+## VERIFIER SI FAILLE ALYZEE OU SI D'OFFICE IL RECUPERE LES 2?
     # Feedback Alexis (Quête 1)
-    if quete1_score >= 2:
+    if quete1_score <=1:
         alexis ""
         alexis ""
     else:
@@ -1425,9 +1503,9 @@ label scene6_feedback:
 
     # Feedback Lola (Quête 3)
     if quete3_score >= 2:
-        lola ""
+        l ""
     else:
-        lola ""
+        l ""
 
     jump scene6_article
 
@@ -1440,14 +1518,14 @@ label scene6_article:
     alexis "Maintenant, sélectionne les éléments les plus pertinents pour l'article final :"
     
     # Vérification inventaire minimum
-    if len(inventaire) < 3:
+    if len(inventory) < 3:
         alexis "Attends... Tu as loupe des éléments crutiaux, la prochaine fois tu devras faire plus gaffe aux  !"
         $ article_incomplet = True
         jump scene7_evaluation
 
 
     # Screen de sélection des éléments
-    call screen selection_article(inventaire)
+    call screen selection_article()
 
     # Calcul score final
     $ score_quetes = ( (quete1_score + quete2_score + quete3_score) / 10 ) * 100  # 12 = 3 quêtes × 4 pts max
@@ -1461,34 +1539,28 @@ label scene6_article:
 
     jump scene7_evaluation
 
-screen selection_article(items):
+screen selection_article():
     frame:
         xalign 0.5
         yalign 0.1
         vbox:
             text "Éléments disponibles :" bold True
-            for item in items:
-                textbutton item["nom"]:
-                    action ToggleDictSelected(item, "selected")
-                    tooltip item["description"]
-
+            for item_id in inventory:
+                textbutton items[item_id]["name"]:
+                    action Function(toggle_selection, item_id)
+                    tooltip items[item_id]["description"]
     frame:
         xalign 0.5
-        yalign 0.9
+        yalign 0.3
         vbox:
             text "Sélection actuelle :"
-            for item in selected_items:
-                text item["nom"] + (" (fiable)" if item["fiable"] else " (douteux)")
-            
+            for item_id in selected_items:
+                text items[item_id]["name"] + (" (fiable)" if items[item_id]["fiable"] else " (douteux)")
             text "Crédibilité : [score_items]"
-            
-            if len(selected_items) >= 2:
+            if len(selected_items) >= 3:
                 textbutton "Valider la sélection" action Return()
             else:
                 text "Minimum 5 éléments requis" color "#ff0000"
-     on "show":
-        $ nombre_preuves_fiables = sum(1 for item in selected_items if item.get("fiable", False))
-        $ total_preuves = len(selected_items)
 
 
 
@@ -1497,12 +1569,18 @@ label scene7_evaluation:
     show c_proviseur at center
     with fade
 
-    # Calcul du score final
-    $ score_quetes = (quete1_score + quete2_score + quete3_score) * 10  # Conversion sur 100
-    $ score_items = (nombre_preuves_fiables / total_preuves) * 100 if total_preuves > 0 else 0
-    $ score_final = (score_quetes * 0.6) + (score_items * 0.4) if total_preuves > 0 else 0  # Pondération 60/40
+      # Calcul du score des items
+    $ nb_fiables = sum(1 for item_id in selected_items if items[item_id]["fiable"])
+    $ total_items = len(selected_items)
+    $ score_items = (nb_fiables / total_items * 100) if total_items > 0 else 0
+
     
-     "[DEBUG] Score quêtes : [quete1_score]/4 [quete2_score]/4 [quete3_score]/4"
+    # Calcul du score final
+    $ score_quetes = (quete1_score + quete2_score + quete3_score) * 10
+    $ score_final = (score_quetes + score_items) / 2
+
+    
+    "[DEBUG] Score quêtes : [quete1_score]/4 [quete2_score]/4 [quete3_score]/4"
     "[DEBUG] Items fiables : [nombre_preuves_fiables]/[total_preuves]"
 
  
@@ -1541,6 +1619,18 @@ label scene7_evaluation:
         "Quitter":
             jump credits
 
+label credits:
+    scene bg_club_journalisme
+    with fade
+
+    show c_alexis at left
+    show c_alice at center
+    show c_lola at right
+
+    alexis "Merci d'avoir joué !"
+    alice "On espère que vous avez appris plein de choses sur la désinformation."
+    lola "Et que vous serez plus vigilant face aux fake news !"
+    
 screen score_report(score):
     frame:
         xalign 0.5

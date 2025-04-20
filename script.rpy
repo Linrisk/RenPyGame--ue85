@@ -128,7 +128,7 @@ init:
         "description": "Article de Lucas sur les jeux vidéo.",
         "fiable": True
     },
-     "temoignage1": {
+    "temoignage1": {
         "name": "Témoignage Élève A", 
         "image": "images/icons/temoignage_1.png",
         "description": "Témoignage non vérifié sur l'incident",
@@ -1237,10 +1237,14 @@ label analyse_biais_1:
             $ quete3_score += 1  # Augmente le score du joueur de 1
             jump témoignage_2  # Saute vers le témoignage suivant
         "fiable":
+            $ pause_music_with_fade()
+            play sound "faux.mp3" loop fadein 0.2
             scene forum with dissolve
             show c_lola_p at left 
             l "Hmm... Ok, moi je trouve que le lien qu'il fait est bizarre..."  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
     $ quete3_score -= 1  # Score = -1
     $ témoignages_récupérés.append("Témoignage 1 (Biaisé)") 
     $ add_to_inventory("temoignage1") # Ajoute le témoignage à la liste des témoignages récupérés
@@ -1569,8 +1573,13 @@ label scene7_evaluation:
     show c_proviseur at center
     with fade
 
+<<<<<<< HEAD
       # Calcul du score des items
     $ nb_fiables = sum(1 for item_id in selected_items if items[item_id]["fiable"])
+=======
+    # Calcul du score des items
+    $ nb_fiables = sum(1 for item in selected_items if item["fiable"])
+>>>>>>> b74afa9e9909836a3520a061387bb7fece95cdc1
     $ total_items = len(selected_items)
     $ score_items = (nb_fiables / total_items * 100) if total_items > 0 else 0
 

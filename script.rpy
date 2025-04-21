@@ -343,8 +343,10 @@ label start:
 
     "La vidéo est terminée."
     $ resume_music_with_fade()
-
+    scene bureau_proviseur
+    with fade
     show c_proviseur
+    with dissolve
     c_proviseur "La vidéo montre donc Paul, un élève de 5ème, après qu'il ait fais un trou dans un mur du collège avec une pioche."
 
     c_proviseur "Les commentaires sous la vidéo s'enflamment, certains affirment qu'il se serait cru dans le jeu vidéo Minecraft et qu'il aura détruit le mur pour récolter du diamant, exactement comme dans le jeu !"
@@ -409,7 +411,7 @@ label club_journalisme_intro:
     alexis "Bien sûr, on est tous spécialisés dans un domaine donc on pourra te donner des conseils dans tes recherches, mais fais attention : ramène des informations pertinentes, et surtout fais preuve d'esprit critique."
 
     # Dialogue avec Alexis (Rédacteur)
-    alexis "De mon côté, j'ai entendu parler d'une source qui pourrait être intéressante. Enzo répète a qui veut bien l'entendre que les jeux vidéos rendent violents et qu'il a des preuves, tu pourrai peut-être aller lui parler ?"
+    alexis "De mon côté, j'ai entendu parler d'une source qui pourrait être intéressante. Ethan répète a qui veut bien l'entendre que les jeux vidéos rendent violents et qu'il a des preuves, tu pourrai peut-être aller lui parler ?"
 
     alexis "Mais méfie-toi, il faut toujours vérifier la fiabilité des sources. Ne prends pas tout pour argent comptant."
 
@@ -1240,7 +1242,7 @@ label analyse_biais_1:
             $ resume_music_with_fade()
             $ quete3_score += 1  # Augmente le score du joueur de 1
             jump témoignage_2  # Saute vers le témoignage suivant
-        "fiable":
+        "Fiable":
             scene forum with dissolve
             show c_lola_p at left 
             $ pause_music_with_fade()
@@ -1313,7 +1315,7 @@ label analyse_biais_2:
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             $ quete3_score += 1  # Augmente le score du joueur de 1
             jump témoignage_3  # Saute vers le témoignage suivant
-        "fiable":
+        "Fiable":
             scene forum with dissolve
             show c_lola_p at left
             $ pause_music_with_fade()
@@ -1393,7 +1395,7 @@ label analyse_biais_3:
             $ resume_music_with_fade()
             $ quete3_score -= 1  # Score = -1  # Augmente le score du joueur de 1
             jump témoignage_4  # Saute vers le témoignage suivant
-        "fiable":
+        "Fiable":
             scene forum with dissolve
             show c_lola at left  
             $ pause_music_with_fade()
@@ -1464,7 +1466,7 @@ label analyse_biais_4:
             l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
             $ quete3_score += 1  # Augmente le score du joueur de 1
             jump conclusion_quete3  # Saute vers le témoignage suivant
-        "fiable":
+        "Fiable":
             scene forum with dissolve
             show c_lola_p at left
             $ pause_music_with_fade()

@@ -372,16 +372,18 @@ label start:
 
     c_proviseur "Je vous ai débloqué tous les accès, vous devriez y jeter un œil."
 
-    c_proviseur "Pour afficher l'inventaire appuyez sur la touche E du clavier. Cliquez ensuite sur Fermer pour le faire disparaitre."
+    c_proviseur "Pour afficher l'inventaire cliquez sur Inventaire en haut à Gauche de l'écran. Cliquez ensuite sur Fermer pour le faire disparaitre."
     hide c_proviseur
     
-
+    scene black
     # Lancement du tutoriel de l'inventaire
     call screen tutoriel_inventaire
 
     hide inventory
 
     show c_proviseur
+    scene bureau_proviseur
+    with fade
 
     c_proviseur "Bonne chance dans votre enquête. La réputation de Paul est en jeu, et la sauvegarde de l'esprit critique de nos élèves est entre vos mains."
 

@@ -1,35 +1,13 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-renpy.geometry renpy.solid
-renpy.alpha renpy.texture
->>>>>>> e6f3d4d (Initial commit)
-renpy.geometry renpy.texture
->>>>>>> 917f32da47964e121d0da5e923fb02af13a4e9d5
-renpy.solid
-<<<<<<< HEAD
-renpy.texture
 =======
+renpy.dissolve renpy.geometry
+renpy.texture
+renpy.alpha renpy.texture
 renpy.dissolve renpy.dissolve
 renpy.alpha renpy.geometry renpy.texture
-renpy.dissolve renpy.geometry
+>>>>>>> 917f32da47964e121d0da5e923fb02af13a4e9d5
+renpy.geometry renpy.solid
+<<<<<<< HEAD
 renpy.ftl
-=======
-=======
->>>>>>> b74afa9e9909836a3520a061387bb7fece95cdc1
-renpy.texture
-renpy.dissolve renpy.dissolve
->>>>>>> e6f3d4d (Initial commit)
-renpy.geometry renpy.solid
-renpy.alpha renpy.geometry renpy.texture
-renpy.dissolve renpy.geometry
-<<<<<<< HEAD
-renpy.geometry renpy.texture
->>>>>>> 917f32da47964e121d0da5e923fb02af13a4e9d5
-renpy.ftl
-renpy.solid
-=======
-renpy.alpha renpy.texture
-<<<<<<< HEAD
->>>>>>> b74afa9e9909836a3520a061387bb7fece95cdc1
-=======
->>>>>>> b74afa9e9909836a3520a061387bb7fece95cdc1
+renpy.solid
+renpy.geometry renpy.texture
+>>>>>>> e6f3d4d (Initial commit)

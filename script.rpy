@@ -300,8 +300,8 @@ screen inventory_slot(item_id):
             action Show("item_description", item_id=item_id)
             xalign 0.5
             yalign 0.5
-        text items[item_id]["name"] size 18 xalign 0.5
-        text ("(Fiable)" if items[item_id]["fiable"] else "(Douteux)") size 14 xalign 0.5
+        #text items[item_id]["name"] size 18 xalign 0.5
+        #text ("(Fiable)" if items[item_id]["fiable"] else "(Douteux)") size 14 xalign 0.5
 
 
 
@@ -1494,7 +1494,10 @@ label scene6_feedback:
         alexis ""
         alexis ""
 
-    # Feedback Alice (Quête 2)
+   # Feedback Alice (Quête 2)
+    show character_alexis_sourit at left, taille_normale
+    show technicienne at center, zoom_perso
+    show c_lola at right
     if quete2_score >= 2:
         alice "Analyse vidéo terminée : ombres incohérentes, absence de clignements et artefacts de deepfake confirmés."
         alice "Preuves techniques solides pour démontrer la manipulation."
@@ -1502,135 +1505,169 @@ label scene6_feedback:
         alice "L'analyse reste incomplète... Difficile d'être catégorique sur l'authenticité de la vidéo."
 
     # Feedback Lola (Quête 3)
-    if quete3_score >= 2:
-        l ""
+    show character_alexis_sourit at left, taille_normale
+    show technicienne at center, taille_normale
+    show c_lola at right, zoom_perso
+    if quete3_score >= 3:
+        l "Bravo, grâce à toi on a des témoignages vraiment fiables pour l’article, je pense que ca va vraiment avoir un impact positifs sur tout le collège..."
+    elif quete3_score >= 2:
+        l "Je pense que tu as peut-être fait quelques erreurs, mais l'important est que tu as su repérer des messages douteux... Ca nous évitera de raconter n'importequoi dans notre article"
     else:
-        l ""
+        l "Avec un peu de recul, je ne suis pas trop sûre de tes choix... J'ai peur de ce qu'on va raconter dans l'article, mais je te fais confiance c'est toi le spécialiste."
+
 
     jump scene6_article
-
+    
 label scene6_article:
     scene bg_club_table
     with dissolve
 
-    show alexis serieux at center
+    show character_alexis_sourit  at center
+
+    # Réinitialisation de la sélection
+    $ selected_items = []
+    $ article_incomplet = False
 
     alexis "Maintenant, sélectionne les éléments les plus pertinents pour l'article final :"
     
     # Vérification inventaire minimum
     if len(inventory) < 3:
-        alexis "Attends... Tu as loupe des éléments crutiaux, la prochaine fois tu devras faire plus gaffe aux  !"
+        character_alexis_sourit "Attends... Tu as loupé des éléments cruciaux, la prochaine fois sois plus attentif !"
         $ article_incomplet = True
         jump scene7_evaluation
-
 
     # Screen de sélection des éléments
     call screen selection_article()
 
-    # Calcul score final
-    $ score_quetes = ( (quete1_score + quete2_score + quete3_score) / 10 ) * 100  # 12 = 3 quêtes × 4 pts max
-    $ score_items = sum(1 for item in selected_items if item["fiable"]) / len(selected_items)
+    # Vérification de la sélection validée
+    if len(selected_items) < 3:
+        alexis "Il te faut au moins 3 éléments pour constituer l'article !"
+        jump scene6_article
+
+    # Calcul des scores (sans affichage)
+    $ score_quetes = ( (quete1_score + quete2_score + quete3_score) / 12 ) * 100  # Correction division
+    $ nb_fiables = sum(1 for item in selected_items if items[item]["fiable"])
+    $ score_items = (nb_fiables / len(selected_items)) * 100 if len(selected_items) > 0 else 0
     $ score_final = (score_quetes + score_items) / 2
 
-    if score_final < 0.5:
-        alexis "L'article manque de preuves tangibles... Le proviseur risque d'être sceptique."
-    else:
-        alexis "Avec ces éléments, notre enquête tiendra la route !"
-
     jump scene7_evaluation
-
+    
+    
 screen selection_article():
+    tag selection  # utile si tu veux pouvoir fermer ce screen proprement
+
     frame:
         xalign 0.5
         yalign 0.1
-        vbox:
-            text "Éléments disponibles :" bold True
-            for item_id in inventory:
-                textbutton items[item_id]["name"]:
-                    action Function(toggle_selection, item_id)
-                    tooltip items[item_id]["description"]
-    frame:
-        xalign 0.5
-        yalign 0.3
-        vbox:
-            text "Sélection actuelle :"
-            for item_id in selected_items:
-                text items[item_id]["name"] + (" (fiable)" if items[item_id]["fiable"] else " (douteux)")
-            text "Crédibilité : [score_items]"
-            if len(selected_items) >= 3:
-                textbutton "Valider la sélection" action Return()
-            else:
-                text "Minimum 5 éléments requis" color "#ff0000"
+        padding (30, 20)
+        has hbox spacing 60
+
+        # Colonne de gauche : Inventaire
+        frame:
+            
+            vbox:
+                text "📦 Éléments disponibles :" size 25 bold True xalign 0.5
+                null height 10
+                for item_id in inventory:
+                    if item_id not in selected_items:
+                        textbutton items[item_id]["name"]:
+                            action Function(toggle_selection, item_id)
+                            tooltip items[item_id]["description"]
+                            style "item_button"
+
+        # Colonne de droite : Sélection en cours
+        frame:
+            vbox:
+                text "📝 Sélection actuelle : ([len(selected_items)]/3)" size 25 bold True xalign 0.5
+                null height 10
+                for item_id in selected_items:
+                    textbutton "❌ " + items[item_id]["name"]:
+                        action Function(toggle_selection, item_id)
+                        tooltip "Cliquez pour retirer cet élément"
+                        style "selected_item_button"
+
+                null height 20
+                if len(selected_items) >= 3:
+                    textbutton "✅ Valider la sélection":
+                        action Return()
+                        style "validate_button"
+                else:
+                    text "⚠️ Minimum 3 éléments requis" color "#ff0000" size 18 xalign 0.5
+
+
 
 
 
 label scene7_evaluation:
-    scene bg_proviseur
+     # Transition 1 semaine plus tard
+    scene black with fade
+    show text "Une semaine plus tard..." at truecenter with dissolve
+    pause 2.0
+    hide text with dissolve
+
+
+    scene bureau_proviseur
     show c_proviseur at center
     with fade
 
-      # Calcul du score des items
+     # Calcul des scores (cachés au joueur)
     $ nb_fiables = sum(1 for item_id in selected_items if items[item_id]["fiable"])
     $ total_items = len(selected_items)
     $ score_items = (nb_fiables / total_items * 100) if total_items > 0 else 0
-
-    
-    # Calcul du score final
     $ score_quetes = (quete1_score + quete2_score + quete3_score) * 10
     $ score_final = (score_quetes + score_items) / 2
 
+    c_proviseur " Le club journal a publié votre article il y a déjà quelques jours."
+    c_proviseur "Nous avons maintenant suffisamment de recul pour en évaluer l'impact et la fiabilité."
     
-    "[DEBUG] Score quêtes : [quete1_score]/4 [quete2_score]/4 [quete3_score]/4"
-    "[DEBUG] Items fiables : [nombre_preuves_fiables]/[total_preuves]"
-
+    
  
-    # Affichage du rapport d'enquête
-    call screen score_report(score_final)
 
-    proviseur "Voyons voir... Vous avez recoupé les témoignages, analysé la vidéo, vérifié les sources..."
-    proviseur "Je vais maintenant évaluer la fiabilité de votre article."
+    c_proviseur "Voyons voir... Vous avez recoupé les témoignages, analysé la vidéo, vérifié les sources..."
+    c_proviseur "Je vais maintenant évaluer la fiabilité de votre article."
+
+    #Annonce du score au joueur : 
+    c_proviseur "Ces éléments nous ont permis d'établir une fiabilité globale de [round(score_final)]%% pour votre article."
 
     # Évaluation finale
     if score_final < 50:
-        show proviseur severe
-        proviseur "Hélas, votre article manque de preuves solides. Les élèves et les parents restent dans le doute."
-        proviseur "La désinformation continue de se propager. Il faudra redoubler d'efforts la prochaine fois."
+        show c_proviseur 
+        c_proviseur "Hélas, votre article manque de preuves solides. Les élèves et les parents restent dans le doute."
+        c_proviseur "La désinformation continue de se propager. Il faudra redoubler d'efforts la prochaine fois."
         play sound "sfx/failure.wav"
-        show red_cross at truecenter with dissolve
 
     elif 50 <= score_final < 70:
-        show proviseur neutre
-        proviseur "Votre article a permis de calmer le jeu. Ce n'est pas parfait, mais vous avez su apporter des éléments de réponse."
-        proviseur "Vous avez rétabli la vérité sur plusieurs points essentiels."
+        show c_proviseur 
+        c_proviseur "Votre article a permis de calmer le jeu. Ce n'est pas parfait, mais vous avez su apporter des éléments de réponse."
+        c_proviseur "Vous avez rétabli la vérité sur plusieurs points essentiels."
         play sound "sfx/neutral.wav"
-        show yellow_check at truecenter with dissolve
 
     else:
-        show proviseur souriant
-        proviseur "Félicitations ! Votre enquête est exemplaire. Grâce à vous, le collège retrouve son calme."
-        proviseur "Tout le monde a pu apprendre à mieux décrypter les informations. Vous avez sauvé le collège !"
+        show c_proviseur 
+        c_proviseur "Félicitations ! Votre enquête est exemplaire. Grâce à vous, le collège retrouve son calme."
+        c_proviseur "Tout le monde a pu apprendre à mieux décrypter les informations. Vous avez sauvé le collège !"
         play sound "sfx/success.wav"
-        show green_check at truecenter with dissolve
 
     # Option de rejeu
-    menu:
-        "Recommencer l'aventure ?":
-            jump start_game
-        "Quitter":
-            jump credits
+    jump credits
 
 label credits:
-    scene bg_club_journalisme
+
+    scene club_journalisme
     with fade
 
-    show c_alexis at left
-    show c_alice at center
+    show character_alexis_sourit at left
+    show technicienne at center
     show c_lola at right
 
     alexis "Merci d'avoir joué !"
     alice "On espère que vous avez appris plein de choses sur la désinformation."
-    lola "Et que vous serez plus vigilant face aux fake news !"
-    
+    l "Et que vous serez plus vigilant face aux fake news !"
+
+    menu:
+        "Finir le jeu":
+            $ renpy.quit()
+
 screen score_report(score):
     frame:
         xalign 0.5

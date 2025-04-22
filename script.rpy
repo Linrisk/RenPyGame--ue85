@@ -553,7 +553,7 @@ label scene_couloirs:
 
         "Est-ce que tu as une source pour ce que tu dis ?":
             lucas "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
-            $ quete1_score += 1  # bon choix, gagne 1 point
+            
             $ add_to_inventory("article_lucas") # ajoute l'article de Lucas à l'inventaire
             "Tu as obtenu l'article de Lucas. Tu pourras aller en vérifier la fiabilité !"
         
@@ -600,12 +600,12 @@ label scene_hall:
     menu: #ouvre des choix après le dialogue
         "Si des scientifiques le disent, alors ça doit être vrai.":
             "Tu acceptes l'information sans poser de question."
-             # Mauvais choix
+            # Mauvais choix
 
         "Est-ce que tu as une source pour ce que tu dis ?":
             show c_ethan
             ethan "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
-            $ quete1_score += 1  # Bon choix
+            
             $ add_to_inventory("article_ethan")# Ajoute l'article d'Ethan à l'inventaire
             "Tu as obtenu l'article d'Ethan. Tu pourras aller en vérifier la fiabilité !"
 
@@ -718,6 +718,7 @@ label scene_lecture_articles:
 
     show c_alexis_sourit
     alexis "Parfait. Lis-les attentivement, puis dis-moi lequel te semble le plus fiable."
+    alexis "Fais attention au ton utilisé, est-il sensationnaliste ? Regarde aussi si des sources sont citées, et regarde si elles te semblent fiables."
 
     label lecture_articles_menu: #choix des articles à lire, menu de retour au choix quand le joueur a fini de lire l'un d'entre eux.
 
@@ -786,6 +787,7 @@ label choix_article_fiable:
         "Quel article est le plus fiable selon toi ?"
         "Celui de Lucas":
             $ choix_article = "lucas" #permet de se souvenir qu'il a choisit l'article de lucas et de le mener au feedback approprié
+            $ quete1_score += 1 #Bon article, gagne un point
         "Celui d'Ethan":
             $ choix_article = "ethan" #idem mais pour l'article d'ethan
 
@@ -1488,11 +1490,11 @@ label scene6_feedback:
 ## VERIFIER SI FAILLE ALYZEE OU SI D'OFFICE IL RECUPERE LES 2?
     # Feedback Alexis (Quête 1)
     if quete1_score <=1:
-        alexis ""
-        alexis ""
+        alexis "Bien joué, tu as su analysé un article et déterminer s'il était fiable."
+        alexis "Continue d'utiliser ces connaissances pour t'assurer de la fiabilité de ce que tu lis au quotidien !"
     else:
-        alexis ""
-        alexis ""
+        alexis "Hm, je pense que tu as besoin d'analyser d'une façon plus critique les articles que tu lis."
+        
 
    # Feedback Alice (Quête 2)
     show character_alexis_sourit at left, taille_normale

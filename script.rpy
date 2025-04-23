@@ -7,7 +7,7 @@ define el = Character("Élève", color="#ff1493")
 define l = Character("Lola", color="#4b01c2")  # Technicienne du club
 define alexis = Character("Alexis (Rédacteur)", color="#00bfff")
 define technicienne = Character("Technicienne", color="#ff69b4")
-define alice = Character("Responsable d'interview", color="#32cd32")
+define alice = Character("Alice", color="#32cd32")
 define lucas = Character("Lucas", color="#fff200")
 define ethan = Character("Ethan", color="#a068ff")
 
@@ -266,7 +266,7 @@ label club_journalisme_intro:
     alexis "Vu que tu es le.la responsable de l’investigation, le mieux, c’est que tu partes sur le terrain pour récolter un maximum d’informations."
     alexis "On doit rédiger un article fiable, basé sur des faits vérifiés pour rétablir le calme dans le collège, on est tous là en soutien mais tu es l'expert.e en investigation donc on te fait confiance."
     alexis "Bien sûr, on est tous spécialisés dans un domaine donc on pourra te donner des conseils dans tes recherches, mais fais attention : ramène des informations pertinentes, et surtout fais preuve d'esprit critique."
-    alexis "De mon côté, j'ai entendu parler d'une source qui pourrait être intéressante. Enzo répète a qui veut bien l'entendre que les jeux vidéos rendent violents et qu'il a des preuves, tu pourrai peut-être aller lui parler ?"
+    alexis "De mon côté, j'ai entendu parler d'une source qui pourrait être intéressante. Ethan répète a qui veut bien l'entendre que les jeux vidéos rendent violents et qu'il a des preuves, tu pourrai peut-être aller lui parler ?"
     alexis "Mais méfie-toi, il faut toujours vérifier la fiabilité des sources. Ne prends pas tout pour argent comptant."
 
     show character_alexis_sourit at left, taille_normale
@@ -379,12 +379,66 @@ label scene_couloirs:
             # Mauvais choix, pas de point
         "Est-ce que tu as une source pour ce que tu dis ?":
             lucas "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
+<<<<<<< HEAD
             $ quete1_score += 1
             $ add_to_inventory("article_lucas")
+=======
+            
+            $ add_to_inventory("article_lucas") # ajoute l'article de Lucas à l'inventaire
+>>>>>>> 0d55bf2ff7a8f6b77fd6d6ea1e185af828bdf44b
             "Tu as obtenu l'article de Lucas. Tu pourras aller en vérifier la fiabilité !"
 
     $ a_parle_a_lucas = True
 
+<<<<<<< HEAD
+=======
+# Scène témoignage d'Ethan
+
+label scene_hall:
+
+    scene b_hall
+
+    with fade
+
+    show c_ethan
+
+    ethan "Mon avis sur les jeux vidéo ? Bah moi, j’suis sûr que ça rend violent." 
+
+    ethan "J’ai lu un article là-dessus, et franchement, ça fait flipper. Ils disent que quand tu joues trop à des jeux où tu tapes ou tu tires sur des gens, ben ton cerveau, il s’habitue à la violence. Du coup, après, t’es plus agressif sans t’en rendre compte."
+
+    ethan "Et là, y’a Lucas qui me sort que c’est n’importe quoi, que lui, il joue tout le temps et qu’il est pas violent du tout."
+
+    ethan "Mais j’suis désolé, c’est pas parce que LUI il se contrôle que c’est pareil pour tout le monde !"
+
+    show c_ethan_2
+
+    ethan "Genre, j’connais un pote, il joue que à des jeux où faut se battre, et ben il s’énerve super vite maintenant."
+
+    ethan "Avant, il était grave cool, mais là, il part au quart de tour pour rien."
+
+    ethan "Même les scientifiques l’ont prouvé, y’a des études qui montrent que ça change notre façon de réagir."
+
+    ethan "Mais Lucas, il veut rien entendre ! Il dit que c’est juste un truc que les adultes répètent pour faire peur."
+
+    ethan "Franchement, il abuse. Après, j’dis pas que tous ceux qui jouent deviennent des criminels, hein, mais bon…"
+
+    ethan "À force, ça doit bien avoir un effet. Et puis, si ça rendait pas violent, pourquoi yaurait autant de bagarres à l’école, hein ? J’suis sûr que y’a un lien !"
+
+    menu: #ouvre des choix après le dialogue
+        "Si des scientifiques le disent, alors ça doit être vrai.":
+            "Tu acceptes l'information sans poser de question."
+            # Mauvais choix
+
+        "Est-ce que tu as une source pour ce que tu dis ?":
+            show c_ethan
+            ethan "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
+            
+            $ add_to_inventory("article_ethan")# Ajoute l'article d'Ethan à l'inventaire
+            "Tu as obtenu l'article d'Ethan. Tu pourras aller en vérifier la fiabilité !"
+
+    $ a_parle_a_ethan = True #valide auprès du jeu que le joueur a parlé à Ethan
+    #variable qui ramène le joueur au choix de destination s'il doit encore parler à un personnage
+>>>>>>> 0d55bf2ff7a8f6b77fd6d6ea1e185af828bdf44b
     if a_parle_a_lucas and a_parle_a_ethan:
         jump reflexion_apres_discussions
     else:
@@ -506,6 +560,7 @@ label scene_lecture_articles:
     with fade
     show c_alexis_sourit
     alexis "Parfait. Lis-les attentivement, puis dis-moi lequel te semble le plus fiable."
+    alexis "Fais attention au ton utilisé, est-il sensationnaliste ? Regarde aussi si des sources sont citées, et regarde si elles te semblent fiables."
 
     label lecture_articles_menu:
         menu:
@@ -556,7 +611,12 @@ label choix_article_fiable:
     menu:
         "Quel article est le plus fiable selon toi ?"
         "Celui de Lucas":
+<<<<<<< HEAD
             $ choix_article = "lucas"
+=======
+            $ choix_article = "lucas" #permet de se souvenir qu'il a choisit l'article de lucas et de le mener au feedback approprié
+            $ quete1_score += 1 #Bon article, gagne un point
+>>>>>>> 0d55bf2ff7a8f6b77fd6d6ea1e185af828bdf44b
         "Celui d'Ethan":
             $ choix_article = "ethan"
 
@@ -1228,11 +1288,11 @@ label scene6_feedback:
 ## VERIFIER SI FAILLE ALYZEE OU SI D'OFFICE IL RECUPERE LES 2?
     # Feedback Alexis (Quête 1)
     if quete1_score <=1:
-        alexis ""
-        alexis ""
+        alexis "Bien joué, tu as su analysé un article et déterminer s'il était fiable."
+        alexis "Continue d'utiliser ces connaissances pour t'assurer de la fiabilité de ce que tu lis au quotidien !"
     else:
-        alexis ""
-        alexis ""
+        alexis "Hm, je pense que tu as besoin d'analyser d'une façon plus critique les articles que tu lis."
+        
 
    # Feedback Alice (Quête 2)
     show character_alexis_sourit at left, taille_normale

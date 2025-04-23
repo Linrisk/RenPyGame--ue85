@@ -1,15 +1,15 @@
-=======
-renpy.geometry renpy.texture
-renpy.alpha renpy.texture
-renpy.dissolve renpy.dissolve
-renpy.dissolve renpy.geometry
-renpy.geometry renpy.solid
-renpy.ftl
->>>>>>> b74afa9e9909836a3520a061387bb7fece95cdc1
-renpy.alpha renpy.geometry renpy.texture
-<<<<<<< HEAD
->>>>>>> 320c5866393e7e92c1f7c37eb90cfc780b5702ba
->>>>>>> 917f32da47964e121d0da5e923fb02af13a4e9d5
-renpy.texture
-renpy.solid
->>>>>>> e6f3d4d (Initial commit)
+renpy.geometry renpy.solid
+>>>>>>> 917f32da47964e121d0da5e923fb02af13a4e9d5
+renpy.geometry renpy.texture
+renpy.dissolve renpy.dissolve
+>>>>>>> e6f3d4d (Initial commit)
+>>>>>>> 320c5866393e7e92c1f7c37eb90cfc780b5702ba
+=======
+renpy.ftl
+renpy.solid
+renpy.texture
+>>>>>>> b74afa9e9909836a3520a061387bb7fece95cdc1
+renpy.alpha renpy.geometry renpy.texture
+renpy.dissolve renpy.geometry
+<<<<<<< HEAD
+renpy.alpha renpy.texture

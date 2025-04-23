@@ -20,9 +20,16 @@ image b_club = "images/backgrounds/b_club.png"
 image b_salle_technicien = "images/backgrounds/b_salle_technicien.png"
 image bureau_proviseur = "images/backgrounds/b_bureau_proviseur.png"
 image c_lola = "images/characters/c_lola.png"
+image c_lola_p = "images/characters/c_lola_pensive.png"
 image c_ethan = "images/characters/c_ethan.png"
 image c_lucas_normal = "images/characters/c_lucas_enerve.png"
+image c_lucas_enerve = "images/characters/c_lucas_enerve.png"
 image c_alice_sourit = "images/characters/c_alice_sourit.png"
+image c_alice_triste = "images/characters/c_alice_triste.png"
+image character_enzo_ = "images/characters/c_enzo.png"
+image character_alexis_sourit = "images/characters/c_alexis_sourit.png"
+image character_alexis_sourit_pas = "images/characters/c_alexis_sourit.png"
+image technicienne = "images/characters/c_alice_sourit.png"
 image c_proviseur = "images/characters/c_proviseur.png"
 
 # Images GUI et items
@@ -189,6 +196,28 @@ screen inventory_slot(item_id):
             xalign 0.5
             yalign 0.5
 
+screen tutoriel_inventaire():
+    modal True
+    add "gui/g_inventory.png" xalign 0.5 yalign 0.2
+    frame:
+        background None
+        xalign 0.5
+        yalign 0.8
+        xsize 800
+        ysize 600
+
+        vbox:
+            spacing 20
+            xalign 0.5
+            yalign 0.1
+            text "Votre Inventaire" size 40 xalign 0.5
+
+            text "Fonctionnalités:" size 30 xalign 0.5
+            text "Voir les objets récoltés" xalign 0.5
+            text "Regarder les objets importants" xalign 0.5
+
+        textbutton "J'ai compris" action [Hide("tutoriel_inventaire"), Return()] xalign 0.5 yalign 0.95
+
 
 screen hud():
     textbutton "Inventaire" action ToggleScreen("inventory_screen") xpos 20 ypos 20
@@ -220,8 +249,10 @@ label start:
 
     "La vidéo est terminée."
     $ resume_music_with_fade()
-
+    scene bureau_proviseur
+    with fade
     show c_proviseur
+    with dissolve
     c_proviseur "La vidéo montre donc Paul, un élève de 5ème, après qu'il ait fais un trou dans un mur du collège avec une pioche."
     c_proviseur "Les commentaires sous la vidéo s'enflamment, certains affirment qu'il se serait cru dans le jeu vidéo Minecraft et qu'il aura détruit le mur pour récolter du diamant, exactement comme dans le jeu !"
     c_proviseur "Le vrai problème, la majorité des commentaires accusent les jeux vidéo de pousser les adolescents à des comportements violents, sans aucune nuance et surtout sans preuve ou source fiable."
@@ -235,14 +266,15 @@ label start:
     c_proviseur "Pour mener cette mission à bien, vous aurez accès à un inventaire."
     c_proviseur "Il vous permettra de voir les objets récoltés, et de les utiliser pour progresser dans votre enquête."
     c_proviseur "Je vous ai débloqué tous les accès, vous devriez y jeter un œil."
-    c_proviseur "Pour afficher l'inventaire appuyez sur la touche E du clavier. Cliquez ensuite sur Fermer pour le faire disparaitre."
+    c_proviseur "Pour afficher l'inventaire cliquez sur Inventaire en haut à Gauche de l'écran. Cliquez ensuite sur Fermer pour le faire disparaitre."
     hide c_proviseur
-
+    scene black
     # Lancement du tutoriel de l'inventaire
     call screen tutoriel_inventaire
 
     hide inventory
-
+    scene bureau_proviseur
+    with fade
     show c_proviseur
     c_proviseur "Bonne chance dans votre enquête. La réputation de Paul est en jeu, et la sauvegarde de l'esprit critique de nos élèves est entre vos mains."
     hide c_proviseur
@@ -303,7 +335,7 @@ label club_journalisme_intro:
 label choix_quete:
     scene club_journalisme
     with fade
-    play music "choix_quete.ogg" fadeout 0.5 fadein 1
+    play music "choix_quete.ogg" fadeout 0.5 fadein 1 volume 0.7
 
     "Alors maintenant, quelle piste décidez vous de suivre ?"
 
@@ -328,7 +360,7 @@ label choix_quete:
 label quete_1:
     scene b_couloirs
     with fade
-    play music "quete_1.wav" loop fadeout 0.5 fadein 1.0
+    play music "quete_1.wav" loop fadeout 0.5 fadein 1.0 volume 0.3
 
     show c_alexis_sourit
 
@@ -379,66 +411,12 @@ label scene_couloirs:
             # Mauvais choix, pas de point
         "Est-ce que tu as une source pour ce que tu dis ?":
             lucas "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
-<<<<<<< HEAD
             $ quete1_score += 1
             $ add_to_inventory("article_lucas")
-=======
-            
-            $ add_to_inventory("article_lucas") # ajoute l'article de Lucas à l'inventaire
->>>>>>> 0d55bf2ff7a8f6b77fd6d6ea1e185af828bdf44b
             "Tu as obtenu l'article de Lucas. Tu pourras aller en vérifier la fiabilité !"
 
     $ a_parle_a_lucas = True
 
-<<<<<<< HEAD
-=======
-# Scène témoignage d'Ethan
-
-label scene_hall:
-
-    scene b_hall
-
-    with fade
-
-    show c_ethan
-
-    ethan "Mon avis sur les jeux vidéo ? Bah moi, j’suis sûr que ça rend violent." 
-
-    ethan "J’ai lu un article là-dessus, et franchement, ça fait flipper. Ils disent que quand tu joues trop à des jeux où tu tapes ou tu tires sur des gens, ben ton cerveau, il s’habitue à la violence. Du coup, après, t’es plus agressif sans t’en rendre compte."
-
-    ethan "Et là, y’a Lucas qui me sort que c’est n’importe quoi, que lui, il joue tout le temps et qu’il est pas violent du tout."
-
-    ethan "Mais j’suis désolé, c’est pas parce que LUI il se contrôle que c’est pareil pour tout le monde !"
-
-    show c_ethan_2
-
-    ethan "Genre, j’connais un pote, il joue que à des jeux où faut se battre, et ben il s’énerve super vite maintenant."
-
-    ethan "Avant, il était grave cool, mais là, il part au quart de tour pour rien."
-
-    ethan "Même les scientifiques l’ont prouvé, y’a des études qui montrent que ça change notre façon de réagir."
-
-    ethan "Mais Lucas, il veut rien entendre ! Il dit que c’est juste un truc que les adultes répètent pour faire peur."
-
-    ethan "Franchement, il abuse. Après, j’dis pas que tous ceux qui jouent deviennent des criminels, hein, mais bon…"
-
-    ethan "À force, ça doit bien avoir un effet. Et puis, si ça rendait pas violent, pourquoi yaurait autant de bagarres à l’école, hein ? J’suis sûr que y’a un lien !"
-
-    menu: #ouvre des choix après le dialogue
-        "Si des scientifiques le disent, alors ça doit être vrai.":
-            "Tu acceptes l'information sans poser de question."
-            # Mauvais choix
-
-        "Est-ce que tu as une source pour ce que tu dis ?":
-            show c_ethan
-            ethan "Oui, je l'ai lu dans un article récemment. Attends, voici le lien."
-            
-            $ add_to_inventory("article_ethan")# Ajoute l'article d'Ethan à l'inventaire
-            "Tu as obtenu l'article d'Ethan. Tu pourras aller en vérifier la fiabilité !"
-
-    $ a_parle_a_ethan = True #valide auprès du jeu que le joueur a parlé à Ethan
-    #variable qui ramène le joueur au choix de destination s'il doit encore parler à un personnage
->>>>>>> 0d55bf2ff7a8f6b77fd6d6ea1e185af828bdf44b
     if a_parle_a_lucas and a_parle_a_ethan:
         jump reflexion_apres_discussions
     else:
@@ -611,12 +589,8 @@ label choix_article_fiable:
     menu:
         "Quel article est le plus fiable selon toi ?"
         "Celui de Lucas":
-<<<<<<< HEAD
-            $ choix_article = "lucas"
-=======
             $ choix_article = "lucas" #permet de se souvenir qu'il a choisit l'article de lucas et de le mener au feedback approprié
             $ quete1_score += 1 #Bon article, gagne un point
->>>>>>> 0d55bf2ff7a8f6b77fd6d6ea1e185af828bdf44b
         "Celui d'Ethan":
             $ choix_article = "ethan"
 
@@ -751,7 +725,7 @@ label conclusion_quete1:
 label quete_2:
     scene b_salle_info
     with fade
-    play music "quete_2.wav" loop fadeout 0.5 fadein 1.0
+    play music "quete_2.wav" loop fadeout 0.5 fadein 1.0 volume 0.5
     show c_alice_sourit at left
     alice "On va analyser la vidéo de Paul ensemble."
     alice "Pour rappel, un deepfake, c'est une vidéo créée ou modifiée grâce à l'intelligence artificielle pour faire croire à quelque chose de faux. Il faut donc être très attentif aux détails !"
@@ -948,7 +922,7 @@ label quete2_synthese:
 ## OCE LOG - A PARTIR DE LA TOUT EST BON 
 # Quête 3 - point d'entrée
 label quete_3:
-    play music "quete_3.wav" loop fadeout 0.5 fadein 1.0
+    play music "quete_3.wav" loop fadeout 0.5 fadein 1.0 volume 0.5
     scene club_journalisme with fade
     $ quests["respo_interview"] = True
     $ current_quest = None
@@ -992,7 +966,7 @@ label témoignage_1:
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
             $ pause_music_with_fade()
-            play sound "faux.mp3" loop fadein 0.2
+            play sound "faux.mp3" loop fadein 0.2 volume 0.3
             scene forum with dissolve
             show c_lola_p at left 
             with dissolve
@@ -1039,8 +1013,12 @@ label analyse_biais_1:
         "fiable":
             scene forum with dissolve
             show c_lola_p at left 
+            $ pause_music_with_fade()
+            play sound "faux.mp3" loop fadein 0.2 volume 0.3
             l "Hmm... Ok, moi je trouve que le lien qu'il fait est bizarre..."  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
+            stop sound fadeout 0.5
+            $ resume_music_with_fade()
     $ quete3_score -= 1  # Score = -1
     $ témoignages_récupérés.append("Témoignage 1 (Biaisé)") 
     $ add_to_inventory("temoignage1") # Ajoute le témoignage à la liste des témoignages récupérés
@@ -1057,7 +1035,7 @@ label témoignage_2:
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
             $ pause_music_with_fade()
-            play sound "faux.mp3" loop fadein 0.2
+            play sound "faux.mp3" loop fadein 0.2 volume 0.3
             scene forum with dissolve
             show c_lola_p at left
             l "Hmm… Ok, moi je trouve qu’il fait confiance un peu vite à ce Youtubeur, en plus il dit même pas qui c’est … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
@@ -1105,7 +1083,7 @@ label analyse_biais_2:
             scene forum with dissolve
             show c_lola_p at left
             $ pause_music_with_fade()
-            play sound "faux.mp3" loop fadein 0.2
+            play sound "faux.mp3" loop fadein 0.2 volume 0.3
             l "Hmm… Ok, moi je trouve qu’il fait confiance un peu vite à ce Youtubeur, en plus il dit même pas qui c’est … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             stop sound fadeout 0.5
@@ -1126,7 +1104,7 @@ label témoignage_3:
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
             $ pause_music_with_fade()
-            play sound "bien_joue.mp3" loop fadein 0.2
+            play sound "bien_joue.mp3" loop fadein 0.2 volume 0.3
             scene forum with dissolve
             show c_lola at left  
             l "Parfait ! Ce témoignage est fiable et précieux pour notre article. En plus il a même mis le lien vers l'enquête, c'est top !" # Feedback bonne réponse
@@ -1173,7 +1151,7 @@ label analyse_biais_3:
             scene forum with dissolve
             show c_lola at left  
             $ pause_music_with_fade()
-            play sound "bien_joue.mp3" loop fadein 0.2
+            play sound "bien_joue.mp3" loop fadein 0.2 volume 0.3
             l "Parfait ! Ce témoignage est fiable et précieux pour notre article. En plus il a même mis le lien vers l'enquête, c'est top !" # Feedback bonne réponse
             l "Allez, témoignage suivant !" # Transition vers le prochain témoignage
             stop sound fadeout 0.5
@@ -1192,7 +1170,7 @@ label témoignage_4:
     menu:  # Crée un menu avec les options de choix pour le joueur
         "Récupérer ce témoignage":  # Option pour récupérer le témoignage
             $ pause_music_with_fade()
-            play sound "faux.mp3" loop fadein 0.2
+            play sound "faux.mp3" loop fadein 0.2 volume 0.3
             scene forum with dissolve
             show c_lola_p at left
             l "Ah ouais … Ok. Moi je trouve pas que ce qu’il dit soit basé sur des infos vraiment fondées son témoignage, puis bon il cite même pas les articles, et alors TikTok moi j’suis pas sûre de valider … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
@@ -1238,7 +1216,7 @@ label analyse_biais_4:
             scene forum with dissolve
             show c_lola_p at left
             $ pause_music_with_fade()
-            play sound "faux.mp3" loop fadein 0.2
+            play sound "faux.mp3" loop fadein 0.2 volume 0.3
             l "Ah ouais … Ok. Moi je trouve pas que ce qu’il dit soit basé sur des infos vraiment fondées son témoignage, puis bon il cite même pas les articles, et alors TikTok moi j’suis pas sûre de valider … mais bon c’est toi le spécialiste !"  # Feedback mauvaise réponse
             l "C'était le dernier, merci pour ton aide !" # Transition vers le prochain témoignage
             stop sound fadeout 0.5
@@ -1276,6 +1254,7 @@ label conclusion_quete3:
 #Ajout derniere scene oce
 
 label scene6_feedback:
+    play music "presentation_club.mp3" fadein 0.5 fadeout 1 volume 0.5
     scene club_journalisme
     with fade
 
@@ -1294,7 +1273,7 @@ label scene6_feedback:
         alexis "Hm, je pense que tu as besoin d'analyser d'une façon plus critique les articles que tu lis."
         
 
-   # Feedback Alice (Quête 2)
+    # Feedback Alice (Quête 2)
     show character_alexis_sourit at left, taille_normale
     show technicienne at center, zoom_perso
     show c_lola at right
@@ -1399,7 +1378,7 @@ screen selection_article():
 
 
 label scene7_evaluation:
-     # Transition 1 semaine plus tard
+    # Transition 1 semaine plus tard
     scene black with fade
     show text "Une semaine plus tard..." at truecenter with dissolve
     pause 2.0
@@ -1410,7 +1389,7 @@ label scene7_evaluation:
     show c_proviseur at center
     with fade
 
-     # Calcul des scores (cachés au joueur)
+    # Calcul des scores (cachés au joueur)
     $ nb_fiables = sum(1 for item_id in selected_items if items[item_id]["fiable"])
     $ total_items = len(selected_items)
     $ score_items = (nb_fiables / total_items * 100) if total_items > 0 else 0
@@ -1431,18 +1410,21 @@ label scene7_evaluation:
 
     # Évaluation finale
     if score_final < 50:
-        show c_proviseur 
+        show c_proviseur
+        play music "fin_victoire.mp3" volume 0.3 
         c_proviseur "Hélas, votre article manque de preuves solides. Les élèves et les parents restent dans le doute."
         c_proviseur "La désinformation continue de se propager. Il faudra redoubler d'efforts la prochaine fois."
         play sound "sfx/failure.wav"
 
     elif 50 <= score_final < 70:
         show c_proviseur 
+        play music "fin_neutre.mp3" volume 0.3
         c_proviseur "Votre article a permis de calmer le jeu. Ce n'est pas parfait, mais vous avez su apporter des éléments de réponse."
         c_proviseur "Vous avez rétabli la vérité sur plusieurs points essentiels."
         play sound "sfx/neutral.wav"
 
     else:
+        play music "fin_perdu.mp3" volume 0.3
         show c_proviseur 
         c_proviseur "Félicitations ! Votre enquête est exemplaire. Grâce à vous, le collège retrouve son calme."
         c_proviseur "Tout le monde a pu apprendre à mieux décrypter les informations. Vous avez sauvé le collège !"
@@ -1463,6 +1445,13 @@ label credits:
     alexis "Merci d'avoir joué !"
     alice "On espère que vous avez appris plein de choses sur la désinformation."
     l "Et que vous serez plus vigilant face aux fake news !"
+
+    "Crédits musicaux :"
+    "Azuritian - Decisions"
+    "Rest! (Ricardo Cuello) - Sound Novel - Visual Novel Music Pack - Tiny Pack"
+    "Tim Beek :  Dystopian by & Music Pack Volume 2 by Tim Beek"
+    "Potat0Master - Background Music for Visual Novels vol.1"
+
 
     menu:
         "Finir le jeu":

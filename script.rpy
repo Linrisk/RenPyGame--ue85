@@ -41,6 +41,18 @@ image temoi2 = "images/items/T2.png"
 image temoi3 = "images/items/T3.png"
 image temoi4 = "images/items/T4.png"
 
+#Quête 2
+image bg_video_analysis = "images/backgrounds/b_zoom_ordi_technicien.png"
+image oeil = "images/icons/eye.png"
+image account = "images/icons/account.png"
+image zoom_visage = "images/zoom_visage.png"
+image zoom_main = "images/zoom_main.png"
+image fake_account_profile = "images/fake_account_profile.png"
+image fake_account_videos = "images/fake_account_videos.png"
+image legit_account = "images/legit_account.png"
+image fake_account_video_1 = Movie(play="videos/video_fake_account_1.webm", size=(640,360), loop=False)
+image fake_account_video_2 = Movie(play="videos/video_fake_account_2.webm", size=(640,360), loop=False)
+
 # Variables de score et progression
 default quete1_score = 0
 default quete2_score = 0
@@ -127,9 +139,7 @@ init:
             "fiable": True
         }
     }
-
 init python:
-    # Fonctions utilitaires pour l'inventaire et le score
     def toggle_selection(item_id):
         global score_items
         if item_id in selected_items:
@@ -144,10 +154,19 @@ init python:
         fiables = sum(1 for i in selected_items if items[i]["fiable"])
         return f"{(fiables * 100) // len(selected_items)}%"
 
+
+    quests = {
+        "alexis": False,
+        "technicienne": False,
+        "respo_interview": False
+    }
+    ##Je mets l'affichage inventaire en haut à gauche - fin le boutton
+    config.overlay_screens.append("hud")
+
     def pause_music_with_fade():
-        renpy.music.set_volume(0.0, delay=1.5, channel="music")
-        renpy.pause(1.0)
-        renpy.music.set_pause(True, channel="music")
+            renpy.music.set_volume(0.0, delay=1.5, channel="music")
+            renpy.pause(1.0)
+            renpy.music.set_pause(True, channel="music")
 
     def resume_music_with_fade():
         renpy.music.set_pause(False, channel="music")
@@ -161,13 +180,69 @@ init python:
                 return True
         return False
 
-    def calculer_pourcentage():
+
+
+
+    def calculer_pourcentage(): # pour calculer le total du score = % de fiabilité de l'article final
         total_score = quete1_score + quete2_score + quete3_score
         total_opportunity = quete1_opportunity + quete2_opportunity + quete3_opportunity
         pourcentage = (float(total_score) / total_opportunity) * 100
         return pourcentage
 
-# Écrans utiles pour le debug, l'inventaire et la sélection d'éléments
+# Faites pas gaffe, c'est juste pour caler les zones de la map cliquable avec l'image
+screen debug_mouse_position():
+    textbutton "Afficher Coordonnées" action Show("mouse_position") xpos 20 ypos 20
+
+screen mouse_position():
+    text "[mousepos]" xalign 0.5 yalign 0.95
+    timer 0.1 action [SetVariable("mousepos", str(renpy.get_mouse_pos())), Show("mouse_position")]
+
+# Détail des objets
+screen item_description(item_id):
+    modal True
+    frame:
+        xalign 0.5
+        yalign 0.5
+        xsize 500
+        ysize 300
+
+        vbox:
+            spacing 10
+            xalign 0.5
+            yalign 0.5
+
+            text items[item_id]["name"] size 30 xalign 0.5
+            null height 20
+            image items[item_id]["image"] xalign 0.5
+            null height 20
+            text items[item_id]["description"] xalign 0.5
+
+        textbutton "Fermer" action Hide("item_description") xalign 0.5 yalign 0.95
+
+# Écran de tutoriel pour l'inventaire
+screen tutoriel_inventaire():
+    modal True
+    add "gui/g_inventory.png" xalign 0.5 yalign 0.2
+    frame:
+        background None
+        xalign 0.5
+        yalign 0.8
+        xsize 800
+        ysize 600
+
+        vbox:
+            spacing 20
+            xalign 0.5
+            yalign 0.1
+            text "Votre Inventaire" size 40 xalign 0.5
+
+            text "Fonctionnalités:" size 30 xalign 0.5
+            text "• Voir les objets récoltés" xalign 0.5
+            text "• Gérer les objets importants" xalign 0.5
+
+        textbutton "J'ai compris" action [Hide("tutoriel_inventaire"), Return()] xalign 0.5 yalign 0.95
+
+# Inventaire
 screen inventory_screen():
     modal True
     frame:
@@ -195,32 +270,14 @@ screen inventory_slot(item_id):
             action Show("item_description", item_id=item_id)
             xalign 0.5
             yalign 0.5
+        #text items[item_id]["name"] size 18 xalign 0.5
+        #text ("(Fiable)" if items[item_id]["fiable"] else "(Douteux)") size 14 xalign 0.5
 
-screen tutoriel_inventaire():
-    modal True
-    add "gui/g_inventory.png" xalign 0.5 yalign 0.2
-    frame:
-        background None
-        xalign 0.5
-        yalign 0.8
-        xsize 800
-        ysize 600
-
-        vbox:
-            spacing 20
-            xalign 0.5
-            yalign 0.1
-            text "Votre Inventaire" size 40 xalign 0.5
-
-            text "Fonctionnalités:" size 30 xalign 0.5
-            text "Voir les objets récoltés" xalign 0.5
-            text "Regarder les objets importants" xalign 0.5
-
-        textbutton "J'ai compris" action [Hide("tutoriel_inventaire"), Return()] xalign 0.5 yalign 0.95
 
 
 screen hud():
     textbutton "Inventaire" action ToggleScreen("inventory_screen") xpos 20 ypos 20
+
 
 # Début de l'histoire, introduction et exposition du contexte
 label start:
@@ -337,10 +394,11 @@ label choix_quete:
     with fade
     play music "choix_quete.ogg" fadeout 0.5 fadein 1 volume 0.7
 
-    "Alors maintenant, quelle piste décidez vous de suivre ?"
-
     if all(quests.values()):
         jump scene6_feedback
+
+    "Alors maintenant, quelle piste décidez vous de suivre ?"
+
 
     menu:
         "Sélectionnez une des pistes d’enquête présentée par chaque membre du club :"
@@ -370,12 +428,19 @@ label quete_1:
 
 label choix_destination:
     "C'est parti, est-ce que je commence par le hall ou les couloirs ?"
-    menu:
-        "Aller aux couloirs":
-            jump scene_couloirs
-        "Aller au hall":
-            jump scene_hall
 
+    menu:
+        "Aller aux couloirs" if not a_parle_a_lucas:
+            jump scene_couloirs  # emmène le joueur pour parler à Lucas
+
+        "Aller au hall" if not a_parle_a_ethan:
+            jump scene_hall  # emmène le joueur pour parler à Ethan
+
+    # Si le joueur a parlé aux deux personnages, passer à la réflexion
+    if a_parle_a_lucas and a_parle_a_ethan:
+        jump reflexion_apres_discussions
+    else:
+        jump choix_destination  # Représente le menu si un personnage n'a pas encore été rencontré
 # Récupération de témoignages oraux
 
 label scene_couloirs:
@@ -741,7 +806,7 @@ label quete_2:
     $ indices_video = []
     $ outils_utilises = []
 
-    call quete2_analysis
+    call quete2_analysis from _call_quete2_analysis
 
 # Ecran accueil choix menu outils
 label quete2_analysis:
@@ -778,7 +843,7 @@ label quete2_visuel:
             $ quete2_score += 1
             $ outils_utilises.append("visuel")
             hide expression "zoom_video" with dissolve
-            call quete2_analysis
+            call quete2_analysis from _call_quete2_analysis_1
             
         "Non, tout a l'air normal.":
             alice "Regarde mieux, fais attention aux mains..."
@@ -791,14 +856,14 @@ label quete2_visuel:
                     $ outils_utilises.append("visuel")
                     $ quete2_score += 1
                     hide expression "zoom_main" with dissolve
-                    call quete2_analysis
+                    call quete2_analysis from _call_quete2_analysis_2
 
                 "Non, je trouve les mains normales.":
                     alice "Pourtant, regarde bien : certains doigts sont déformés ou il y a des mouvements impossibles. Les IA ont souvent du mal avec les mains et cree des mains à 6 doigts, c'est un signe de manipulation."
                     $ indices_video.append("Mains suspectes (signalé par Alice)")
                     $ outils_utilises.append("visuel")
                     hide expression "zoom_main" with dissolve
-                    call quete2_analysis
+                    call quete2_analysis from _call_quete2_analysis_3
 
 
 
@@ -870,12 +935,12 @@ label quete2_temoin:
             $ indices_video.append("Témoignage douteux (signalé par Alice)")
 
     $ outils_utilises.append("temoin")
-    call quete2_analysis
+    call quete2_analysis from _call_quete2_analysis_4
 
 
 label quete2_continue:
     if len(outils_utilises) < 3:  # Si moins de 2 outils utilisés
-        call quete2_analysis  # Retour à l'écran dde base
+        call quete2_analysis from _call_quete2_analysis_5  # Retour à l'écran dde base
     else:
         jump quete2_synthese  # Passe à la conclusion
 
@@ -976,6 +1041,7 @@ label témoignage_1:
             $ resume_music_with_fade()
             $ quete3_score -= 1  # Score = -1
             $ témoignages_récupérés.append("Témoignage 1 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
+            $ add_to_inventory("temoignage1")
             jump témoignage_2  # Saute vers le témoignage suivant
 
         "Analyser ce témoignage":  # Option pour analyser le témoignage
@@ -1090,7 +1156,7 @@ label analyse_biais_2:
             $ resume_music_with_fade()
     $ quete3_score -= 1  # Score = -1
     $ témoignages_récupérés.append("Témoignage 2 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
-    $ add_to_inventory("temoignage3")
+    $ add_to_inventory("temoignage2")
     jump témoignage_3  # Saute vers le témoignage suivant
 
 label témoignage_3:
@@ -1113,7 +1179,7 @@ label témoignage_3:
             $ resume_music_with_fade()
             $ quete3_score += 1
             $ témoignages_récupérés.append("Témoignage 3 (Fiable)")
-            $ add_to_inventory("temoignage4")
+            $ add_to_inventory("temoignage3")
             jump témoignage_4
 
         "Analyser ce témoignage":  # Option pour analyser le témoignage
@@ -1157,7 +1223,8 @@ label analyse_biais_3:
             stop sound fadeout 0.5
             $ resume_music_with_fade()
             $ quete3_score += 1
-    $ témoignages_récupérés.append("Témoignage 2 (Fiable)")  # Ajoute le témoignage à la liste des témoignages récupérés
+    $ témoignages_récupérés.append("Témoignage 3 (Fiable)")  # Ajoute le témoignage à la liste des témoignages récupérés
+    $ add_to_inventory("temoignage3")
     jump témoignage_4  # Saute vers le témoignage suivant
 
 label témoignage_4:
@@ -1178,7 +1245,8 @@ label témoignage_4:
             stop sound fadeout 0.5
             $ resume_music_with_fade()
             $ quete3_score -= 1  # Score = -1
-            $ témoignages_récupérés.append("Témoignage 2 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
+            $ témoignages_récupérés.append("Témoignage 4 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
+            $ add_to_inventory("temoignage4")
             jump conclusion_quete3  # Saute vers le témoignage suivant
 
         "Analyser ce témoignage":  # Option pour analyser le témoignage
@@ -1223,6 +1291,7 @@ label analyse_biais_4:
             $ resume_music_with_fade()
     $ quete3_score -= 1  # Score = -1
     $ témoignages_récupérés.append("Témoignage 4 (Biaisé)")  # Ajoute le témoignage à la liste des témoignages récupérés
+    $ add_to_inventory("temoignage4")
     jump conclusion_quete3  # Saute vers le témoignage suivant
 
 label conclusion_quete3:
@@ -1267,7 +1336,7 @@ label scene6_feedback:
 ## VERIFIER SI FAILLE ALYZEE OU SI D'OFFICE IL RECUPERE LES 2?
     # Feedback Alexis (Quête 1)
     if quete1_score <=1:
-        alexis "Bien joué, tu as su analysé un article et déterminer s'il était fiable."
+        alexis "Bien joué, tu as su analyser un article et déterminer s'il était fiable."
         alexis "Continue d'utiliser ces connaissances pour t'assurer de la fiabilité de ce que tu lis au quotidien !"
     else:
         alexis "Hm, je pense que tu as besoin d'analyser d'une façon plus critique les articles que tu lis."
@@ -1298,7 +1367,7 @@ label scene6_feedback:
     jump scene6_article
     
 label scene6_article:
-    scene bg_club_table
+    scene b_club
     with dissolve
 
     show character_alexis_sourit  at center
@@ -1399,19 +1468,14 @@ label scene7_evaluation:
     c_proviseur " Le club journal a publié votre article il y a déjà quelques jours."
     c_proviseur "Nous avons maintenant suffisamment de recul pour en évaluer l'impact et la fiabilité."
     
-    
- 
-
-    c_proviseur "Voyons voir... Vous avez recoupé les témoignages, analysé la vidéo, vérifié les sources..."
-    c_proviseur "Je vais maintenant évaluer la fiabilité de votre article."
 
     #Annonce du score au joueur : 
-    c_proviseur "Ces éléments nous ont permis d'établir une fiabilité globale de [round(score_final)]%% pour votre article."
+    c_proviseur "Au vu de l'impact qu'a eu votre article on peut juger qu'il avait une fiabilité globale de [round(score_final)]%% pour votre article."
 
     # Évaluation finale
     if score_final < 50:
         show c_proviseur
-        play music "fin_victoire.mp3" volume 0.3 
+        play music "fin_perdu.mp3" volume 0.3
         c_proviseur "Hélas, votre article manque de preuves solides. Les élèves et les parents restent dans le doute."
         c_proviseur "La désinformation continue de se propager. Il faudra redoubler d'efforts la prochaine fois."
         play sound "sfx/failure.wav"
@@ -1424,7 +1488,7 @@ label scene7_evaluation:
         play sound "sfx/neutral.wav"
 
     else:
-        play music "fin_perdu.mp3" volume 0.3
+        play music "fin_victoire.mp3" volume 0.3 
         show c_proviseur 
         c_proviseur "Félicitations ! Votre enquête est exemplaire. Grâce à vous, le collège retrouve son calme."
         c_proviseur "Tout le monde a pu apprendre à mieux décrypter les informations. Vous avez sauvé le collège !"

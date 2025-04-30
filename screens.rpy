@@ -296,39 +296,39 @@ screen navigation():
 
         if main_menu:
 
-            textbutton _("Nouvelle partie") action Start()
+            textbutton _("Nouvelle partie") action Start() text_color "#000000"
 
         else:
 
-            textbutton _("Historique") action ShowMenu("history")
+            textbutton _("Historique") action ShowMenu("history") text_color "#000000"
 
-            textbutton _("Sauvegarde") action ShowMenu("save")
+            textbutton _("Sauvegarde") action ShowMenu("save") text_color "#000000"
 
-        textbutton _("Charger") action ShowMenu("load")
+        textbutton _("Charger") action ShowMenu("load") text_color "#000000"
 
-        textbutton _("Préférences") action ShowMenu("preferences")
+        textbutton _("Préférences") action ShowMenu("preferences") text_color "#000000"
 
         if _in_replay:
 
-            textbutton _("Fin de la rediffusion") action EndReplay(confirm=True)
+            textbutton _("Fin de la rediffusion") action EndReplay(confirm=True) text_color "#000000"
 
         elif not main_menu:
 
-            textbutton _("Menu principal") action MainMenu()
+            textbutton _("Menu principal") action MainMenu() text_color "#000000"
 
-        textbutton _("À propos") action ShowMenu("about")
+        textbutton _("À propos") action ShowMenu("about") text_color "#000000"
 
         if renpy.variant("pc") or (renpy.variant("web") and not renpy.variant("mobile")):
 
             ## L'aide n’est ni nécessaire ni pertinente sur les appareils
             ## mobiles.
-            textbutton _("Aide") action ShowMenu("help")
+            textbutton _("Aide") action ShowMenu("help") text_color "#000000"
 
         if renpy.variant("pc"):
 
             ## Le bouton pour quitter est banni sur iOS et inutile sur Android
             ## et sur le Web.
-            textbutton _("Quitter") action Quit(confirm=not main_menu)
+            textbutton _("Quitter") action Quit(confirm=not main_menu) text_color "#000000"
 
 
 style navigation_button is gui_button
@@ -385,7 +385,7 @@ style main_menu_frame:
     xsize 420
     yfill True
 
-    background "gui/overlay/main_menu.png"
+    background "gui/overlay/image_couv_jeu.png"
 
 style main_menu_vbox:
     xalign 1.0

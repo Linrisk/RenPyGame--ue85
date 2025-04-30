@@ -15,7 +15,7 @@
 ##
 ## La chaîne de caractère contenu dans _() est éligible à la traduction.
 
-define config.name = _("testUE")
+define config.name = _("UE85 - Hoaxbuster : Chasseurs de Fakenews")
 
 
 ## Détermine si le titre renseigné plus haut est affiché sur l'écran du menu
@@ -40,7 +40,7 @@ define gui.about = _p("""
 ## l’exécutable. Il ne doit contenir que des caractères ASCII et ne doit pas
 ## contenir d’espace, de virgules ou de points-virgules.
 
-define build.name = "testUE"
+define build.name = "UE85-Hoaxbuster"
 
 
 ## Sons et musiques ############################################################
@@ -149,7 +149,7 @@ default preferences.afm_time = 15
 ## Cela ne devrait généralement pas changer. Si vous le faîtes, choisissez
 ## toujours une chaîne de caractères littéraux, pas une expression.
 
-define config.save_directory = "testUE-1741804691"
+define config.save_directory = "Hoaxbuster-1741804691"
 
 
 ## Icône #######################################################################
